@@ -1,0 +1,27 @@
+name: dependencies
+description: "Core dependencies for the application"
+version: 0.0.1
+resolution: workspace
+
+environment:
+  sdk: ^3.13.1
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_modular: ^6.4.1
+
+  bloc: ^9.0.0
+  flutter_bloc: ^9.1.1
+  provider: ^6.1.1
+  flutter_riverpod: ^2.4.9
+  get: ^4.6.6
+
+  dartz: ^0.10.1
+  equatable: ^2.0.7
+
+  sqflite: ^2.3.0
+  path_provider: ^2.1.0
+  path: ^1.9.0

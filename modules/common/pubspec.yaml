@@ -1,0 +1,14 @@
+name: common
+description: "Common shared code between modules"
+version: 0.0.1
+resolution: workspace
+
+environment:
+  sdk: ^3.13.1
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dependencies:
+    path: ../dependencies
