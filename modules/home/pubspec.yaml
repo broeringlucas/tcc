@@ -1,5 +1,5 @@
-name: common
-description: "Common shared code between modules"
+name: home
+description: "Home module with To-Do List features"
 version: 0.0.1
 publish_to: 'none'
 resolution: workspace
@@ -11,5 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  common:
+    path: ../common
   dependencies:
     path: ../dependencies

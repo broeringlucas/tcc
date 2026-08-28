@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dependencies/flutter_modular.dart';
+import 'package:home/main.dart';
 
 class AppModule extends Module {
   @override
@@ -10,10 +11,11 @@ class AppModule extends Module {
 
   @override
   void routes(r) {
-    r.child('/', child: (_) => const _PlaceholderScreen());
+    r.module('/', module: HomeModule());
   }
 }
 
+/*
 class _PlaceholderScreen extends StatelessWidget {
   const _PlaceholderScreen();
 
@@ -32,4 +34,4 @@ class _PlaceholderScreen extends StatelessWidget {
       ),
     );
   }
-}
+}*/

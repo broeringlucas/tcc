@@ -3,7 +3,7 @@ description: "A new Flutter project."
 publish_to: 'none'
 
 workspace:
-#  - modules/home
+  - modules/home
   - modules/dependencies
   - modules/common
 
@@ -20,8 +20,8 @@ dependencies:
     path: ./modules/common
   dependencies:
     path: ./modules/dependencies
-#  home:
-#    path: ./modules/home
+  home:
+    path: ./modules/home
 
   cupertino_icons: ^1.0.8
 
