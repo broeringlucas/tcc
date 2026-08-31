@@ -6,19 +6,9 @@ class TodoTask extends Equatable {
   final String description;
   final bool completed;
 
-  const TodoTask({
-    this.id,
-    required this.title,
-    this.description = '',
-    this.completed = false,
-  });
+  const TodoTask({this.id, required this.title, this.description = '', this.completed = false});
 
-  TodoTask copyWith({
-    int? id,
-    String? title,
-    String? description,
-    bool? completed,
-  }) {
+  TodoTask copyWith({int? id, String? title, String? description, bool? completed}) {
     return TodoTask(
       id: id ?? this.id,
       title: title ?? this.title,

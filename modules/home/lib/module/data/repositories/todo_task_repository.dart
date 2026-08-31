@@ -1,4 +1,4 @@
-import 'package:common/core/error/failures.dart';
+import 'package:common/main.dart';
 import 'package:dependencies/dartz.dart';
 
 import '../../../main.dart';
@@ -9,9 +9,9 @@ class TodoTaskRepositoryImpl implements TodoTaskRepository {
   TodoTaskRepositoryImpl(this.dataSource);
 
   @override
-  Future<Either<Failure, List<TodoTask>>> getTasks() async {
+  Future<Either<Failure, List<TodoTask>>> getTasks({int limit = 0}) async {
     try {
-      final maps = await dataSource.getTasks();
+      final maps = await dataSource.getTasks(limit: limit);
       final tasks = maps.map((map) => TodoTaskModel.fromMap(map).toEntity()).toList();
       return Right(tasks);
     } catch (e) {
@@ -51,24 +51,6 @@ class TodoTaskRepositoryImpl implements TodoTaskRepository {
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure('Failed to update task: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> seedTasks(int count) async {
-    try {
-      for (int i = 0; i < count; i++) {
-        final task = TodoTask(
-          title: 'Task ${i + 1}',
-          description: 'Description for task ${i + 1}. This is a sample text to test state management with richer data.',
-          completed: i % 3 == 0,
-        );
-        final model = TodoTaskModel.fromEntity(task);
-        await dataSource.insertTask(model.toMap());
-      }
-      return const Right(null);
-    } catch (e) {
-      return Left(DatabaseFailure('Failed to seed database: $e'));
     }
   }
 }

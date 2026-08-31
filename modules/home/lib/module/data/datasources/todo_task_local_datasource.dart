@@ -5,12 +5,12 @@ class TodoTaskLocalDataSource {
 
   TodoTaskLocalDataSource(this.database);
 
-  Future<int> insertTask(Map<String, dynamic> task) async {
-    return await database.insertTask(task);
+  Future<List<Map<String, dynamic>>> getTasks({int limit = 0}) async {
+    return await database.getTasks(limit: limit);
   }
 
-  Future<List<Map<String, dynamic>>> getTasks() async {
-    return await database.getTasks();
+  Future<int> insertTask(Map<String, dynamic> task) async {
+    return await database.insertTask(task);
   }
 
   Future<int> deleteTask(int id) async {
