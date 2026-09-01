@@ -1,12 +1,6 @@
-import 'package:dependencies/equatable.dart';
-
 import '../../../main.dart';
 
-abstract class TaskState extends Equatable {
-  const TaskState();
-  @override
-  List<Object> get props => [];
-}
+abstract class TaskState {}
 
 class TaskInitial extends TaskState {}
 
@@ -14,14 +8,13 @@ class TaskLoading extends TaskState {}
 
 class TaskLoaded extends TaskState {
   final List<TodoTask> tasks;
-  const TaskLoaded(this.tasks);
-  @override
-  List<Object> get props => [tasks];
+  final TodoTaskFilter currentFilter;
+  final String searchQuery;
+
+  TaskLoaded(this.tasks, {this.currentFilter = TodoTaskFilter.all, this.searchQuery = ''});
 }
 
 class TaskError extends TaskState {
   final String message;
-  const TaskError(this.message);
-  @override
-  List<Object> get props => [message];
+  TaskError(this.message);
 }

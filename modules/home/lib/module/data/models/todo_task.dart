@@ -5,11 +5,27 @@ class TodoTaskModel {
   final String title;
   final String description;
   final bool completed;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
 
-  TodoTaskModel({this.id, required this.title, this.description = '', this.completed = false});
+  TodoTaskModel({
+    this.id,
+    required this.title,
+    this.description = '',
+    this.completed = false,
+    required this.createdAt,
+    this.updatedAt,
+  });
 
   factory TodoTaskModel.fromEntity(TodoTask task) {
-    return TodoTaskModel(id: task.id, title: task.title, description: task.description, completed: task.completed);
+    return TodoTaskModel(
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      completed: task.completed,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+    );
   }
 
   factory TodoTaskModel.fromMap(Map<String, dynamic> map) {
@@ -18,14 +34,30 @@ class TodoTaskModel {
       title: map['title'],
       description: map['description'] ?? '',
       completed: map['completed'] == 1,
+      createdAt: DateTime.parse(map['created_at']), // 🆕
+      updatedAt: map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'title': title, 'description': description, 'completed': completed ? 1 : 0};
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'completed': completed ? 1 : 0,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
   }
 
   TodoTask toEntity() {
-    return TodoTask(id: id, title: title, description: description, completed: completed);
+    return TodoTask(
+      id: id,
+      title: title,
+      description: description,
+      completed: completed,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
   }
 }

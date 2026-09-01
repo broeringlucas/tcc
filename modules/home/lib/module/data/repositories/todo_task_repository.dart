@@ -44,7 +44,7 @@ class TodoTaskRepositoryImpl implements TodoTaskRepository {
   Future<Either<Failure, void>> updateTask(TodoTask task) async {
     try {
       if (task.id == null) {
-        return const Left(DatabaseFailure('Task has no ID'));
+        return Left(DatabaseFailure('Task ID cannot be null'));
       }
       final model = TodoTaskModel.fromEntity(task);
       await dataSource.updateTask(task.id!, model.toMap());

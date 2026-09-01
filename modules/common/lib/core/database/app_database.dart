@@ -19,6 +19,8 @@ class AppDatabase {
     final path = await getDatabasesPath();
     final dbPath = join(path, 'tasks.db');
 
+    // await deleteDatabase(dbPath);
+
     return await openDatabase(dbPath, version: 2, onCreate: _onCreate);
   }
 
@@ -28,7 +30,9 @@ class AppDatabase {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         description TEXT NOT NULL DEFAULT '',
-        completed INTEGER NOT NULL DEFAULT 0
+        completed INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT
       )
     ''');
   }
@@ -40,21 +44,26 @@ class AppDatabase {
     final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM tasks'));
 
     if (count == 0) {
-      print('Database is empty. Seeding 10,000 tasks...');
+      print('Database is empty. Seeding tasks...');
       final start = DateTime.now();
 
       final batch = db.batch();
-      for (int i = 1; i <= 100000; i++) {
+
+      for (int i = 1; i <= 10000; i++) {
+        final createdAt = DateTime.now().subtract(Duration(days: i ~/ 10)).toIso8601String();
+
         batch.insert('tasks', {
           'title': 'Task $i',
           'description': 'Description for task $i.',
           'completed': i % 3 == 0 ? 1 : 0,
+          'created_at': createdAt,
+          'updated_at': null,
         });
       }
       await batch.commit(noResult: true);
 
       final duration = DateTime.now().difference(start);
-      print('Seeded 10,000 tasks in ${duration.inMilliseconds}ms');
+      print('Seeded tasks in ${duration.inMilliseconds}ms');
     }
 
     _isSeeded = true;
@@ -68,9 +77,9 @@ class AppDatabase {
   Future<List<Map<String, dynamic>>> getTasks({int limit = 0}) async {
     final db = await database;
     if (limit > 0) {
-      return await db.query('tasks', limit: limit);
+      return await db.query('tasks', orderBy: 'created_at DESC', limit: limit);
     }
-    return await db.query('tasks');
+    return await db.query('tasks', orderBy: 'created_at DESC');
   }
 
   Future<int> deleteTask(int id) async {

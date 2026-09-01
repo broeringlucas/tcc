@@ -8,11 +8,29 @@ abstract class TaskEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadTasksWithCount extends TaskEvent {
+class LoadTasksWithFilter extends TaskEvent {
+  final TodoTaskFilter filter;
   final int count;
-  const LoadTasksWithCount(this.count);
+  final String searchQuery;
+
+  const LoadTasksWithFilter({this.filter = TodoTaskFilter.all, this.count = 0, this.searchQuery = ''});
+
   @override
-  List<Object> get props => [count];
+  List<Object> get props => [filter, count, searchQuery];
+}
+
+class ChangeFilterEvent extends TaskEvent {
+  final TodoTaskFilter filter;
+  const ChangeFilterEvent(this.filter);
+  @override
+  List<Object> get props => [filter];
+}
+
+class SearchTasksEvent extends TaskEvent {
+  final String query;
+  const SearchTasksEvent(this.query);
+  @override
+  List<Object> get props => [query];
 }
 
 class AddTaskEvent extends TaskEvent {
@@ -27,4 +45,18 @@ class DeleteTaskEvent extends TaskEvent {
   const DeleteTaskEvent(this.id);
   @override
   List<Object> get props => [id];
+}
+
+class ToggleTaskEvent extends TaskEvent {
+  final TodoTask task;
+  const ToggleTaskEvent(this.task);
+  @override
+  List<Object> get props => [task];
+}
+
+class UpdateTaskEvent extends TaskEvent {
+  final TodoTask task;
+  const UpdateTaskEvent(this.task);
+  @override
+  List<Object> get props => [task];
 }

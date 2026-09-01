@@ -19,6 +19,7 @@ class HomeModule extends Module {
     i.add<GetTasks>(GetTasks.new);
     i.add<AddTask>(AddTask.new);
     i.add<DeleteTask>(DeleteTask.new);
+    i.add<UpdateTask>(UpdateTask.new);
 
     // BLoC
     i.addSingleton<TaskBloc>(
@@ -26,6 +27,7 @@ class HomeModule extends Module {
         getTasks: Modular.get<GetTasks>(),
         addTask: Modular.get<AddTask>(),
         deleteTask: Modular.get<DeleteTask>(),
+        updateTask: Modular.get<UpdateTask>(),
       ),
     );
   }
@@ -35,5 +37,13 @@ class HomeModule extends Module {
     r.child('/', child: (_) => const BlocHomeView());
 
     r.child('/add', child: (_) => AddTaskView());
+
+    r.child(
+      '/edit',
+      child: (context) {
+        final args = Modular.args.data as TodoTask;
+        return EditTaskView(task: args);
+      },
+    );
   }
 }

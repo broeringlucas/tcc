@@ -17,7 +17,10 @@ class _AddTaskViewState extends State<AddTaskView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New Task')),
+      appBar: AppBar(
+        title: const Text('New Task'),
+        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _addTask)],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -33,8 +36,6 @@ class _AddTaskViewState extends State<AddTaskView> {
               decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
               maxLines: 3,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(onPressed: _addTask, child: const Text('Save')),
           ],
         ),
       ),
@@ -45,9 +46,14 @@ class _AddTaskViewState extends State<AddTaskView> {
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
-    final task = TodoTask(title: title, description: _descriptionController.text.trim());
+    final task = TodoTask(
+      title: title,
+      description: _descriptionController.text.trim(),
+      completed: false,
+      createdAt: DateTime.now(),
+    );
 
-    Modular.get<TaskBloc>().add(AddTaskEvent(task));
+    context.read<TaskBloc>().add(AddTaskEvent(task));
     Modular.to.pop();
   }
 
