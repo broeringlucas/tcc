@@ -49,7 +49,7 @@ class AppDatabase {
 
       final batch = db.batch();
 
-      for (int i = 1; i <= 10000; i++) {
+      for (int i = 1; i <= 100000; i++) {
         final createdAt = DateTime.now().subtract(Duration(days: i ~/ 10)).toIso8601String();
 
         batch.insert('tasks', {

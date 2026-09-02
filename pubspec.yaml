@@ -1,13 +1,13 @@
 name: tcc
-description: "A new Flutter project."
+description: "TCC - State Management"
 publish_to: 'none'
+version: 1.0.0+1
 
 workspace:
-  - modules/home
-  - modules/dependencies
   - modules/common
-
-version: 1.0.0+1
+  - modules/dependencies
+  - modules/home
+  - modules/task
 
 environment:
   sdk: ^3.13.1
@@ -22,6 +22,8 @@ dependencies:
     path: ./modules/dependencies
   home:
     path: ./modules/home
+  task:
+    path: ./modules/task
 
   cupertino_icons: ^1.0.8
 

@@ -1,4 +1,3 @@
-import 'package:common/main.dart';
 import 'package:dependencies/bloc.dart';
 import 'package:dependencies/flutter_modular.dart';
 import 'package:flutter/material.dart';
@@ -15,14 +14,12 @@ class BlocHomeView extends StatefulWidget {
 class _BlocHomeViewState extends State<BlocHomeView> {
   late final TaskBloc _bloc;
   final TextEditingController _searchController = TextEditingController();
-  TodoTaskFilter _currentFilter = TodoTaskFilter.all;
 
   @override
   void initState() {
     super.initState();
     _bloc = Modular.get<TaskBloc>();
     _bloc.loadTasksWithFilter(TodoTaskFilter.all, 0);
-
     _searchController.addListener(() {
       _bloc.searchTasks(_searchController.text);
     });
@@ -37,17 +34,34 @@ class _BlocHomeViewState extends State<BlocHomeView> {
 
   @override
   Widget build(BuildContext context) {
-    PerformanceTracker().recordRebuild('BlocHomeView');
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('BLoC - To-Do List'),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
         actions: [
-          AppBarActions(
-            currentFilter: _currentFilter,
+          FilterDropdown(
+            currentFilter: _bloc.state is TaskLoaded ? (_bloc.state as TaskLoaded).currentFilter : TodoTaskFilter.all,
             onFilterChanged: (filter) => _bloc.changeFilter(filter),
-            onLoadTasks: (count) => _bloc.loadTasksWithFilter(_currentFilter, count),
-            implementationName: 'BLoC',
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.play_arrow),
+            onSelected: (value) {
+              final count = int.parse(value);
+              if (count >= 0) {
+                final currentFilter = _bloc.state is TaskLoaded
+                    ? (_bloc.state as TaskLoaded).currentFilter
+                    : TodoTaskFilter.all;
+                _bloc.loadTasksWithFilter(currentFilter, count);
+              }
+            },
+            tooltip: 'Load tasks',
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: '0', child: Text('Load all tasks')),
+              PopupMenuItem(value: '1000', child: Text('Load 1,000 tasks')),
+              PopupMenuItem(value: '10000', child: Text('Load 10,000 tasks')),
+              PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
+            ],
           ),
         ],
       ),
@@ -65,11 +79,10 @@ class _BlocHomeViewState extends State<BlocHomeView> {
                   return Center(child: Text(state.message));
                 }
                 if (state is TaskLoaded) {
-                  _currentFilter = state.currentFilter;
                   if (state.tasks.isEmpty) {
                     return EmptyState(
                       filter: state.currentFilter,
-                      searchQuery: state.searchQuery,
+                      searchQuery: _searchController.text,
                       onClearFilters: () {
                         _searchController.clear();
                         _bloc.searchTasks('');
@@ -78,14 +91,18 @@ class _BlocHomeViewState extends State<BlocHomeView> {
                     );
                   }
                   return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: state.tasks.length,
-                    itemBuilder: (_, index) => TaskTile(
-                      key: ValueKey(state.tasks[index].id),
-                      task: state.tasks[index],
-                      onToggle: () => _bloc.add(ToggleTaskEvent(state.tasks[index])),
-                      onDelete: () => _bloc.add(DeleteTaskEvent(state.tasks[index].id!)),
-                      onEdit: () => Modular.to.pushNamed('/edit', arguments: state.tasks[index]),
-                    ),
+                    itemBuilder: (_, index) {
+                      final task = state.tasks[index];
+                      return TaskTile(
+                        key: ValueKey(task.id),
+                        task: task,
+                        onToggle: () => _bloc.add(ToggleTaskEvent(task)),
+                        onDelete: () => _bloc.add(DeleteTaskEvent(task.id!)),
+                        onEdit: () => Modular.to.pushNamed('/edit', arguments: task),
+                      );
+                    },
                   );
                 }
                 return const SizedBox();

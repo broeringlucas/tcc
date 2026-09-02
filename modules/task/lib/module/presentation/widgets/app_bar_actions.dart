@@ -20,7 +20,6 @@ class AppBarActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Filtro
         PopupMenuButton<TodoTaskFilter>(
           icon: const Icon(Icons.filter_list),
           onSelected: onFilterChanged,

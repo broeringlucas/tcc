@@ -56,7 +56,7 @@ class PerformanceTracker {
     } else if (value >= 1000) {
       return '${(value / 1000).toStringAsFixed(2)}ms';
     } else {
-      return '${value}µs';
+      return '$valueµs';
     }
   }
 

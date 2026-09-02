@@ -7,9 +7,9 @@ class TaskTile extends StatefulWidget {
   final TodoTask task;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
 
-  const TaskTile({super.key, required this.task, required this.onToggle, required this.onDelete, required this.onEdit});
+  const TaskTile({super.key, required this.task, required this.onToggle, required this.onDelete, this.onEdit});
 
   @override
   State<TaskTile> createState() => _TaskTileState();
@@ -61,10 +61,11 @@ class _TaskTileState extends State<TaskTile> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
-            onPressed: widget.onEdit,
-          ),
+          if (widget.onEdit != null)
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blue),
+              onPressed: widget.onEdit,
+            ),
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: widget.onDelete,

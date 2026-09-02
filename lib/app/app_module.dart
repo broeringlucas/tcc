@@ -1,5 +1,6 @@
 import 'package:dependencies/flutter_modular.dart';
-import 'package:home/main.dart';
+import 'package:home/module/home_module.dart';
+import 'package:task/module/task_module.dart';
 
 class AppModule extends Module {
   @override
@@ -11,5 +12,6 @@ class AppModule extends Module {
   @override
   void routes(r) {
     r.module('/', module: HomeModule());
+    r.module('/task', module: TaskModule());
   }
 }

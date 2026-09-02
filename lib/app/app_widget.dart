@@ -29,12 +29,12 @@ class _AppWidgetState extends State<AppWidget> {
   @override
   Widget build(BuildContext context) {
     if (!_isDatabaseReady) {
-      return MaterialApp(
+      return const MaterialApp(
         home: Scaffold(
           body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [CircularProgressIndicator(), SizedBox(height: 16), Text('Preparing database...')],
+              children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Preparing database...')],
             ),
           ),
         ),

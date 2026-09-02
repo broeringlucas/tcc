@@ -1,5 +1,5 @@
-name: home
-description: "Home module with home features"
+name: task
+description: "Todo module with To-Do List features"
 version: 0.0.1
 publish_to: 'none'
 resolution: workspace
