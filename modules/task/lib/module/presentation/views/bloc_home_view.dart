@@ -1,3 +1,4 @@
+import 'package:common/main.dart';
 import 'package:dependencies/bloc.dart';
 import 'package:dependencies/flutter_modular.dart';
 import 'package:flutter/material.dart';
@@ -14,20 +15,28 @@ class BlocHomeView extends StatefulWidget {
 class _BlocHomeViewState extends State<BlocHomeView> {
   late final TaskBloc _bloc;
   final TextEditingController _searchController = TextEditingController();
+  late final DebounceUtil _debounce;
 
   @override
   void initState() {
     super.initState();
     _bloc = Modular.get<TaskBloc>();
     _bloc.loadTasksWithFilter(TodoTaskFilter.all, 0);
-    _searchController.addListener(() {
-      _bloc.searchTasks(_searchController.text);
+    _debounce = DebounceUtil();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text;
+    _debounce.run(() {
+      _bloc.searchTasks(query);
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce.dispose();
     _bloc.close();
     super.dispose();
   }
@@ -67,7 +76,7 @@ class _BlocHomeViewState extends State<BlocHomeView> {
       ),
       body: Column(
         children: [
-          CustomSearchBar(controller: _searchController, onSearch: (query) => _bloc.searchTasks(query)),
+          CustomSearchBar(controller: _searchController),
           Expanded(
             child: BlocBuilder<TaskBloc, TaskState>(
               bloc: _bloc,

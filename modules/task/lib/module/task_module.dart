@@ -1,6 +1,7 @@
 import 'package:common/main.dart';
 import 'package:dependencies/flutter_modular.dart';
-import 'package:dependencies/provider.dart';
+import 'package:dependencies/flutter_riverpod.dart';
+import 'package:dependencies/provider.dart' as provider_pkg;
 
 import '../main.dart';
 
@@ -25,8 +26,8 @@ class TaskModule extends Module {
       ),
     );
 
-    i.add<TaskNotifier>(
-      () => TaskNotifier(
+    i.add<ProviderTaskNotifier>(
+      () => ProviderTaskNotifier(
         getTasks: Modular.get<GetTasks>(),
         addTask: Modular.get<AddTask>(),
         deleteTask: Modular.get<DeleteTask>(),
@@ -42,14 +43,29 @@ class TaskModule extends Module {
     r.child(
       '/provider',
       child: (_) {
-        return ChangeNotifierProvider(
-          create: (context) => TaskNotifier(
+        return provider_pkg.ChangeNotifierProvider(
+          create: (context) => ProviderTaskNotifier(
             getTasks: Modular.get<GetTasks>(),
             addTask: Modular.get<AddTask>(),
             deleteTask: Modular.get<DeleteTask>(),
             updateTask: Modular.get<UpdateTask>(),
           ),
           child: const ProviderHomeView(),
+        );
+      },
+    );
+
+    r.child(
+      '/riverpod',
+      child: (_) {
+        return ProviderScope(
+          overrides: [
+            getTasksProvider.overrideWith((ref) => Modular.get<GetTasks>()),
+            addTaskProvider.overrideWith((ref) => Modular.get<AddTask>()),
+            deleteTaskProvider.overrideWith((ref) => Modular.get<DeleteTask>()),
+            updateTaskProvider.overrideWith((ref) => Modular.get<UpdateTask>()),
+          ],
+          child: const RiverpodHomeView(),
         );
       },
     );

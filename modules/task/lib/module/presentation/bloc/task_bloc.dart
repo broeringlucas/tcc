@@ -94,11 +94,28 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   }
 
   Future<void> _onSearchTasks(SearchTasksEvent event, Emitter<TaskState> emit) async {
+    final tracker = PerformanceTracker();
+
     _searchQuery = event.query;
 
+    final memBefore = tracker.getCurrentMemoryMB();
+
+    final stopwatch = Stopwatch()..start();
     final result = TaskFilterUtils.applyFilters(_allTasks, _currentFilter, event.query);
+    stopwatch.stop();
+
+    tracker.recordOperationMicros(
+      'SEARCH_${event.query.isEmpty ? "empty" : event.query}_tasks',
+      stopwatch.elapsedMicroseconds,
+    );
+
+    final memAfter = tracker.getCurrentMemoryMB();
+    tracker.recordMemory('SEARCH_BEFORE_${event.query.isEmpty ? "empty" : event.query}', memBefore);
+    tracker.recordMemory('SEARCH_AFTER_${event.query.isEmpty ? "empty" : event.query}', memAfter);
 
     emit(TaskLoaded(result, currentFilter: _currentFilter, searchQuery: event.query));
+
+    tracker.printSummary();
   }
 
   Future<void> _onAddTask(AddTaskEvent event, Emitter<TaskState> emit) async {

@@ -2,15 +2,9 @@ import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatelessWidget {
   final TextEditingController controller;
-  final ValueChanged<String> onSearch;
   final String hintText;
 
-  const CustomSearchBar({
-    super.key,
-    required this.controller,
-    required this.onSearch,
-    this.hintText = 'Buscar tarefas...',
-  });
+  const CustomSearchBar({super.key, required this.controller, this.hintText = 'Buscar tarefas...'});
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +21,10 @@ class CustomSearchBar extends StatelessWidget {
                   icon: const Icon(Icons.clear, size: 20),
                   onPressed: () {
                     controller.clear();
-                    onSearch('');
                   },
                 )
               : null,
         ),
-        onChanged: onSearch,
       ),
     );
   }

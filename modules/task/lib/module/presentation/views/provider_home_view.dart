@@ -1,3 +1,4 @@
+import 'package:common/main.dart';
 import 'package:dependencies/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -13,29 +14,37 @@ class ProviderHomeView extends StatefulWidget {
 class _ProviderHomeViewState extends State<ProviderHomeView> {
   final TextEditingController _searchController = TextEditingController();
   TodoTaskFilter _currentFilter = TodoTaskFilter.all;
+  late final DebounceUtil _debounce;
 
   @override
   void initState() {
     super.initState();
+    _debounce = DebounceUtil();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = Provider.of<TaskNotifier>(context, listen: false);
+      final notifier = Provider.of<ProviderTaskNotifier>(context, listen: false);
       notifier.loadTasksWithFilter(TodoTaskFilter.all, 0);
     });
-    _searchController.addListener(() {
-      final notifier = Provider.of<TaskNotifier>(context, listen: false);
-      notifier.searchTasks(_searchController.text);
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text;
+    _debounce.run(() {
+      final notifier = Provider.of<ProviderTaskNotifier>(context, listen: false);
+      notifier.searchTasks(query);
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TaskNotifier>(
+    return Consumer<ProviderTaskNotifier>(
       builder: (context, notifier, child) {
         _currentFilter = notifier.currentFilter;
 
@@ -69,7 +78,7 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
           ),
           body: Column(
             children: [
-              CustomSearchBar(controller: _searchController, onSearch: (query) => notifier.searchTasks(query)),
+              CustomSearchBar(controller: _searchController),
               Expanded(child: _buildBody(notifier)),
             ],
           ),
@@ -78,7 +87,7 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
     );
   }
 
-  Widget _buildBody(TaskNotifier notifier) {
+  Widget _buildBody(ProviderTaskNotifier notifier) {
     if (notifier.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
