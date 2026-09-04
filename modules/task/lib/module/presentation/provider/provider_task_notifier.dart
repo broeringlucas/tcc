@@ -13,7 +13,7 @@ class ProviderTaskNotifier extends ChangeNotifier {
   List<TodoTask> _filteredTasks = [];
   TodoTaskFilter _currentFilter = TodoTaskFilter.all;
   String _searchQuery = '';
-  bool _isLoading = false;
+  bool _isLoading = true;
   String? _error;
 
   List<TodoTask> get tasks => _filteredTasks;
@@ -62,12 +62,10 @@ class ProviderTaskNotifier extends ChangeNotifier {
         );
 
         processStopwatch.stop();
-        tracker.recordOperationMicros('PROCESS_${filter.name}_${count}', processStopwatch.elapsedMicroseconds);
+        tracker.recordOperationMicros('PROCESS_${filter.name}_$count', processStopwatch.elapsedMicroseconds);
 
         final memAfter = tracker.getCurrentMemoryMB();
         tracker.recordMemory('AFTER_${filter.name}_$count', memAfter);
-
-        tracker.printSummary();
       });
     } else {
       _getTasks(GetTasksParams(0)).then((result) {
@@ -112,8 +110,6 @@ class ProviderTaskNotifier extends ChangeNotifier {
     tracker.recordMemory('SEARCH_AFTER_${query.isEmpty ? "empty" : query}', memAfter);
 
     notifyListeners();
-
-    tracker.printSummary();
   }
 
   void _applyFilters() {

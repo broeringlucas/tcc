@@ -1,4 +1,5 @@
 import 'package:common/main.dart';
+import 'package:dependencies/bloc.dart';
 import 'package:dependencies/flutter_modular.dart';
 import 'package:dependencies/flutter_riverpod.dart';
 import 'package:dependencies/provider.dart' as provider_pkg;
@@ -16,29 +17,22 @@ class TaskModule extends Module {
     i.add<AddTask>(AddTask.new);
     i.add<DeleteTask>(DeleteTask.new);
     i.add<UpdateTask>(UpdateTask.new);
-
-    i.addSingleton<TaskBloc>(
-      () => TaskBloc(
-        getTasks: Modular.get<GetTasks>(),
-        addTask: Modular.get<AddTask>(),
-        deleteTask: Modular.get<DeleteTask>(),
-        updateTask: Modular.get<UpdateTask>(),
-      ),
-    );
-
-    i.add<ProviderTaskNotifier>(
-      () => ProviderTaskNotifier(
-        getTasks: Modular.get<GetTasks>(),
-        addTask: Modular.get<AddTask>(),
-        deleteTask: Modular.get<DeleteTask>(),
-        updateTask: Modular.get<UpdateTask>(),
-      ),
-    );
   }
 
   @override
   void routes(r) {
-    r.child('/bloc', child: (_) => const BlocHomeView());
+    r.child(
+      '/bloc',
+      child: (_) => BlocProvider(
+        create: (_) => TaskBloc(
+          getTasks: Modular.get<GetTasks>(),
+          addTask: Modular.get<AddTask>(),
+          deleteTask: Modular.get<DeleteTask>(),
+          updateTask: Modular.get<UpdateTask>(),
+        ),
+        child: const BlocHomeView(),
+      ),
+    );
 
     r.child(
       '/provider',
@@ -67,15 +61,6 @@ class TaskModule extends Module {
           ],
           child: const RiverpodHomeView(),
         );
-      },
-    );
-
-    r.child('/add', child: (_) => const AddTaskView());
-    r.child(
-      '/edit',
-      child: (context) {
-        final task = Modular.args.data as TodoTask;
-        return EditTaskView(task: task);
       },
     );
   }

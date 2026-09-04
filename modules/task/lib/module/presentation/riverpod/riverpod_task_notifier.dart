@@ -3,30 +3,34 @@ import 'package:dependencies/flutter_riverpod.dart';
 
 import '../../../main.dart';
 
-class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
-  final GetTasks _getTasks;
-  final AddTask _addTask;
-  final DeleteTask _deleteTask;
-  final UpdateTask _updateTask;
+class RiverpodTaskNotifier extends Notifier<AsyncValue<List<TodoTask>>> {
+  late final GetTasks _getTasks;
+  late final AddTask _addTask;
+  late final DeleteTask _deleteTask;
+  late final UpdateTask _updateTask;
 
   List<TodoTask> _allTasks = [];
+  List<TodoTask> _filteredTasks = [];
   TodoTaskFilter _currentFilter = TodoTaskFilter.all;
   String _searchQuery = '';
 
-  RiverpodTaskNotifier({
-    required this._getTasks,
-    required this._addTask,
-    required this._deleteTask,
-    required this._updateTask,
-  }) : super(const AsyncValue.loading());
+  @override
+  AsyncValue<List<TodoTask>> build() {
+    _getTasks = ref.read(getTasksProvider);
+    _addTask = ref.read(addTaskProvider);
+    _deleteTask = ref.read(deleteTaskProvider);
+    _updateTask = ref.read(updateTaskProvider);
+    return const AsyncValue.loading();
+  }
 
-  List<TodoTask> get tasks => state.value ?? [];
+  List<TodoTask> get tasks => _filteredTasks;
   bool get isLoading => state.isLoading;
   String? get error => state.error?.toString();
   TodoTaskFilter get currentFilter => _currentFilter;
 
   void loadTasksWithFilter(TodoTaskFilter filter, int count) {
     _currentFilter = filter;
+    state = const AsyncValue.loading();
 
     if (count > 0) {
       final tracker = PerformanceTracker();
@@ -48,7 +52,7 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
           (tasks) {
             _allTasks = tasks;
             _applyFilters();
-            state = AsyncValue.data(_filteredTasks());
+            state = AsyncValue.data(_filteredTasks);
           },
         );
 
@@ -57,11 +61,8 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
 
         final memAfter = tracker.getCurrentMemoryMB();
         tracker.recordMemory('AFTER_${filter.name}_$count', memAfter);
-
-        tracker.printSummary();
       });
     } else {
-      state = const AsyncValue.loading();
       _getTasks(GetTasksParams(0)).then((result) {
         result.fold(
           (failure) {
@@ -70,7 +71,7 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
           (tasks) {
             _allTasks = tasks;
             _applyFilters();
-            state = AsyncValue.data(_filteredTasks());
+            state = AsyncValue.data(_filteredTasks);
           },
         );
       });
@@ -80,7 +81,7 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
   void changeFilter(TodoTaskFilter filter) {
     _currentFilter = filter;
     _applyFilters();
-    state = AsyncValue.data(_filteredTasks());
+    state = AsyncValue.data(_filteredTasks);
   }
 
   void searchTasks(String query) {
@@ -92,26 +93,19 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
 
     final stopwatch = Stopwatch()..start();
     _applyFilters();
-    final filtered = _filteredTasks();
     stopwatch.stop();
 
-    tracker.recordOperationMicros('search_${query.isEmpty ? "empty" : query}_tasks', stopwatch.elapsedMicroseconds);
+    tracker.recordOperationMicros('SEARCH_${query.isEmpty ? "empty" : query}_tasks', stopwatch.elapsedMicroseconds);
 
     final memAfter = tracker.getCurrentMemoryMB();
-
-    // Valores absolutos
     tracker.recordMemory('SEARCH_BEFORE_${query.isEmpty ? "empty" : query}', memBefore);
     tracker.recordMemory('SEARCH_AFTER_${query.isEmpty ? "empty" : query}', memAfter);
 
-    state = AsyncValue.data(filtered);
-
-    tracker.printSummary();
+    state = AsyncValue.data(_filteredTasks);
   }
 
-  void _applyFilters() {}
-
-  List<TodoTask> _filteredTasks() {
-    return TaskFilterUtils.applyFilters(_allTasks, _currentFilter, _searchQuery);
+  void _applyFilters() {
+    _filteredTasks = TaskFilterUtils.applyFilters(_allTasks, _currentFilter, _searchQuery);
   }
 
   Future<void> addTask(TodoTask task) async {
@@ -137,7 +131,7 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
         if (index != -1) {
           _allTasks[index] = task;
           _applyFilters();
-          state = AsyncValue.data(_filteredTasks());
+          state = AsyncValue.data(_filteredTasks);
         }
       },
     );
@@ -152,7 +146,7 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
       (_) {
         _allTasks = _allTasks.where((task) => task.id != id).toList();
         _applyFilters();
-        state = AsyncValue.data(_filteredTasks());
+        state = AsyncValue.data(_filteredTasks);
       },
     );
   }
@@ -169,7 +163,7 @@ class RiverpodTaskNotifier extends StateNotifier<AsyncValue<List<TodoTask>>> {
         if (index != -1) {
           _allTasks[index] = updatedTask;
           _applyFilters();
-          state = AsyncValue.data(_filteredTasks());
+          state = AsyncValue.data(_filteredTasks);
         }
       },
     );

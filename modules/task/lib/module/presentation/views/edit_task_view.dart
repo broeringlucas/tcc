@@ -1,12 +1,12 @@
-import 'package:dependencies/flutter_modular.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
 
 class EditTaskView extends StatefulWidget {
   final TodoTask task;
+  final void Function(TodoTask task) onSubmit;
 
-  const EditTaskView({super.key, required this.task});
+  const EditTaskView({super.key, required this.task, required this.onSubmit});
 
   @override
   State<EditTaskView> createState() => _EditTaskViewState();
@@ -30,12 +30,30 @@ class _EditTaskViewState extends State<EditTaskView> {
     super.dispose();
   }
 
+  void _submit() {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) return;
+
+    final updatedTask = widget.task.copyWith(
+      title: title,
+      description: _descriptionController.text.trim(),
+      updatedAt: DateTime.now(),
+    );
+
+    widget.onSubmit(updatedTask);
+    Navigator.of(context).pop();
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Task'),
-        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveTask)],
+        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _submit)],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -77,23 +95,5 @@ class _EditTaskViewState extends State<EditTaskView> {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _saveTask() {
-    final title = _titleController.text.trim();
-    if (title.isEmpty) return;
-
-    final updatedTask = widget.task.copyWith(
-      title: title,
-      description: _descriptionController.text.trim(),
-      updatedAt: DateTime.now(),
-    );
-
-    context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
-    Modular.to.pop();
   }
 }

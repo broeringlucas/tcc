@@ -24,6 +24,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<UpdateTaskEvent>(_onUpdateTask);
   }
 
+  TodoTaskFilter get currentFilter => _currentFilter;
+
   void loadTasksWithFilter(TodoTaskFilter filter, int count) {
     add(LoadTasksWithFilter(filter: filter, count: count));
   }
@@ -34,6 +36,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   void searchTasks(String query) {
     add(SearchTasksEvent(query));
+  }
+
+  void addTask(TodoTask task) {
+    add(AddTaskEvent(task));
+  }
+
+  void updateTask(TodoTask task) {
+    add(UpdateTaskEvent(task));
   }
 
   Future<void> _onLoadTasksWithFilter(LoadTasksWithFilter event, Emitter<TaskState> emit) async {
@@ -70,8 +80,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
       final memAfter = tracker.getCurrentMemoryMB();
       tracker.recordMemory('AFTER_${event.filter.name}_${event.count}', memAfter);
-
-      tracker.printSummary();
     } else {
       final dbResult = await _getTasks(GetTasksParams(0));
 
@@ -90,7 +98,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onChangeFilter(ChangeFilterEvent event, Emitter<TaskState> emit) async {
     _currentFilter = event.filter;
-    add(LoadTasksWithFilter(filter: event.filter, count: 0, searchQuery: _searchQuery));
+    final filteredTasks = TaskFilterUtils.applyFilters(_allTasks, _currentFilter, _searchQuery);
+    emit(TaskLoaded(filteredTasks, currentFilter: _currentFilter, searchQuery: _searchQuery));
   }
 
   Future<void> _onSearchTasks(SearchTasksEvent event, Emitter<TaskState> emit) async {
@@ -114,8 +123,6 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     tracker.recordMemory('SEARCH_AFTER_${event.query.isEmpty ? "empty" : event.query}', memAfter);
 
     emit(TaskLoaded(result, currentFilter: _currentFilter, searchQuery: event.query));
-
-    tracker.printSummary();
   }
 
   Future<void> _onAddTask(AddTaskEvent event, Emitter<TaskState> emit) async {

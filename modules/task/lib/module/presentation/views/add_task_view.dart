@@ -1,10 +1,11 @@
-import 'package:dependencies/flutter_modular.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
 
 class AddTaskView extends StatefulWidget {
-  const AddTaskView({super.key});
+  final void Function(TodoTask task) onSubmit;
+
+  const AddTaskView({super.key, required this.onSubmit});
 
   @override
   State<AddTaskView> createState() => _AddTaskViewState();
@@ -15,11 +16,33 @@ class _AddTaskViewState extends State<AddTaskView> {
   final _descriptionController = TextEditingController();
 
   @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final title = _titleController.text.trim();
+    if (title.isEmpty) return;
+
+    final task = TodoTask(
+      title: title,
+      description: _descriptionController.text.trim(),
+      completed: false,
+      createdAt: DateTime.now(),
+    );
+
+    widget.onSubmit(task);
+    Navigator.of(context).pop();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('New Task'),
-        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _addTask)],
+        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _submit)],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -40,27 +63,5 @@ class _AddTaskViewState extends State<AddTaskView> {
         ),
       ),
     );
-  }
-
-  void _addTask() {
-    final title = _titleController.text.trim();
-    if (title.isEmpty) return;
-
-    final task = TodoTask(
-      title: title,
-      description: _descriptionController.text.trim(),
-      completed: false,
-      createdAt: DateTime.now(),
-    );
-
-    context.read<TaskBloc>().add(AddTaskEvent(task));
-    Modular.to.pop();
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
   }
 }

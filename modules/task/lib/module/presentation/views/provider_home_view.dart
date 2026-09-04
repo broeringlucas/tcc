@@ -13,7 +13,6 @@ class ProviderHomeView extends StatefulWidget {
 
 class _ProviderHomeViewState extends State<ProviderHomeView> {
   final TextEditingController _searchController = TextEditingController();
-  TodoTaskFilter _currentFilter = TodoTaskFilter.all;
   late final DebounceUtil _debounce;
 
   @override
@@ -21,8 +20,7 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
     super.initState();
     _debounce = DebounceUtil();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = Provider.of<ProviderTaskNotifier>(context, listen: false);
-      notifier.loadTasksWithFilter(TodoTaskFilter.all, 0);
+      context.read<ProviderTaskNotifier>().loadTasksWithFilter(TodoTaskFilter.all, 0);
     });
     _searchController.addListener(_onSearchChanged);
   }
@@ -30,8 +28,7 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
   void _onSearchChanged() {
     final query = _searchController.text;
     _debounce.run(() {
-      final notifier = Provider.of<ProviderTaskNotifier>(context, listen: false);
-      notifier.searchTasks(query);
+      context.read<ProviderTaskNotifier>().searchTasks(query);
     });
   }
 
@@ -46,8 +43,6 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
   Widget build(BuildContext context) {
     return Consumer<ProviderTaskNotifier>(
       builder: (context, notifier, child) {
-        _currentFilter = notifier.currentFilter;
-
         return Scaffold(
           appBar: AppBar(
             title: const Text('Provider - To-Do List'),
@@ -63,7 +58,7 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
                 onSelected: (value) {
                   final count = int.parse(value);
                   if (count >= 0) {
-                    notifier.loadTasksWithFilter(_currentFilter, count);
+                    notifier.loadTasksWithFilter(notifier.currentFilter, count);
                   }
                 },
                 tooltip: 'Load tasks',
@@ -74,6 +69,7 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
                   PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
                 ],
               ),
+              const PerfMenu(),
             ],
           ),
           body: Column(
@@ -81,6 +77,12 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
               CustomSearchBar(controller: _searchController),
               Expanded(child: _buildBody(notifier)),
             ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: notifier.addTask)),
+            ),
+            child: const Icon(Icons.add),
           ),
         );
       },
@@ -94,7 +96,8 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
     if (notifier.error != null) {
       return Center(child: Text(notifier.error!));
     }
-    if (notifier.tasks.isEmpty) {
+    final tasks = notifier.tasks;
+    if (tasks.isEmpty) {
       return EmptyState(
         filter: notifier.currentFilter,
         searchQuery: _searchController.text,
@@ -107,15 +110,17 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
     }
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: notifier.tasks.length,
+      itemCount: tasks.length,
       itemBuilder: (_, index) {
-        final task = notifier.tasks[index];
+        final task = tasks[index];
         return TaskTile(
           key: ValueKey(task.id),
           task: task,
           onToggle: () => notifier.toggleTask(task),
           onDelete: () => notifier.deleteTask(task.id!),
-          onEdit: null,
+          onEdit: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: notifier.updateTask)),
+          ),
         );
       },
     );

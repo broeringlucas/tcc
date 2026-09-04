@@ -13,7 +13,6 @@ class RiverpodHomeView extends ConsumerStatefulWidget {
 
 class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
   final TextEditingController _searchController = TextEditingController();
-  TodoTaskFilter _currentFilter = TodoTaskFilter.all;
   late final DebounceUtil _debounce;
 
   @override
@@ -21,8 +20,7 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
     super.initState();
     _debounce = DebounceUtil();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = ref.read(riverpodTaskNotifierProvider.notifier);
-      notifier.loadTasksWithFilter(TodoTaskFilter.all, 0);
+      ref.read(riverpodTaskNotifierProvider.notifier).loadTasksWithFilter(TodoTaskFilter.all, 0);
     });
     _searchController.addListener(_onSearchChanged);
   }
@@ -30,8 +28,7 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
   void _onSearchChanged() {
     final query = _searchController.text;
     _debounce.run(() {
-      final notifier = ref.read(riverpodTaskNotifierProvider.notifier);
-      notifier.searchTasks(query);
+      ref.read(riverpodTaskNotifierProvider.notifier).searchTasks(query);
     });
   }
 
@@ -55,17 +52,14 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
         actions: [
           FilterDropdown(
             currentFilter: notifier.currentFilter,
-            onFilterChanged: (filter) {
-              _currentFilter = filter;
-              notifier.changeFilter(filter);
-            },
+            onFilterChanged: (filter) => notifier.changeFilter(filter),
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.play_arrow),
             onSelected: (value) {
               final count = int.parse(value);
               if (count >= 0) {
-                notifier.loadTasksWithFilter(_currentFilter, count);
+                notifier.loadTasksWithFilter(notifier.currentFilter, count);
               }
             },
             tooltip: 'Load tasks',
@@ -76,46 +70,58 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
               PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
             ],
           ),
+          const PerfMenu(),
         ],
       ),
       body: Column(
         children: [
           CustomSearchBar(controller: _searchController),
-          Expanded(
-            child: state.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text(error.toString())),
-              data: (tasks) {
-                if (tasks.isEmpty) {
-                  return EmptyState(
-                    filter: notifier.currentFilter,
-                    searchQuery: _searchController.text,
-                    onClearFilters: () {
-                      _searchController.clear();
-                      notifier.searchTasks('');
-                      notifier.changeFilter(TodoTaskFilter.all);
-                    },
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: tasks.length,
-                  itemBuilder: (_, index) {
-                    final task = tasks[index];
-                    return TaskTile(
-                      key: ValueKey(task.id),
-                      task: task,
-                      onToggle: () => notifier.toggleTask(task),
-                      onDelete: () => notifier.deleteTask(task.id!),
-                      onEdit: null,
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+          Expanded(child: _buildBody(notifier, state)),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: notifier.addTask)),
+        ),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildBody(RiverpodTaskNotifier notifier, AsyncValue<List<TodoTask>> state) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.hasError) {
+      return Center(child: Text(state.error.toString()));
+    }
+    final tasks = state.value ?? <TodoTask>[];
+    if (tasks.isEmpty) {
+      return EmptyState(
+        filter: notifier.currentFilter,
+        searchQuery: _searchController.text,
+        onClearFilters: () {
+          _searchController.clear();
+          notifier.searchTasks('');
+          notifier.changeFilter(TodoTaskFilter.all);
+        },
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: tasks.length,
+      itemBuilder: (_, index) {
+        final task = tasks[index];
+        return TaskTile(
+          key: ValueKey(task.id),
+          task: task,
+          onToggle: () => notifier.toggleTask(task),
+          onDelete: () => notifier.deleteTask(task.id!),
+          onEdit: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: notifier.updateTask)),
+          ),
+        );
+      },
     );
   }
 }
