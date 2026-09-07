@@ -63,5 +63,13 @@ class TaskModule extends Module {
         );
       },
     );
+
+    r.child(
+      '/getx',
+      child: (_) {
+        TaskBinding().dependencies();
+        return const GetxHomeView();
+      },
+    );
   }
 }

@@ -3,4 +3,6 @@ export 'custom_search_bar.dart';
 export 'empty_state.dart';
 export 'filter_dropdown.dart';
 export 'perf_menu.dart';
+export 'scroll_benchmark_button.dart';
+export 'task_list_view.dart';
 export 'task_tile.dart';

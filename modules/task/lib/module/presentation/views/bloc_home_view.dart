@@ -13,6 +13,7 @@ class BlocHomeView extends StatefulWidget {
 
 class _BlocHomeViewState extends State<BlocHomeView> {
   final TextEditingController _searchController = TextEditingController();
+  final GlobalKey<TaskListViewState> _listKey = GlobalKey();
   late final DebounceUtil _debounce;
 
   @override
@@ -44,6 +45,7 @@ class _BlocHomeViewState extends State<BlocHomeView> {
     return BlocBuilder<TaskBloc, TaskState>(
       builder: (context, state) {
         final bloc = context.read<TaskBloc>();
+        PerformanceTracker().recordRebuildWithContext('REBUILD_bloc');
 
         return Scaffold(
           appBar: AppBar(
@@ -70,6 +72,9 @@ class _BlocHomeViewState extends State<BlocHomeView> {
                   PopupMenuItem(value: '10000', child: Text('Load 10,000 tasks')),
                   PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
                 ],
+              ),
+              ScrollBenchmarkButton(
+                onRun: () async => _listKey.currentState?.runScrollBenchmark(),
               ),
               const PerfMenu(),
             ],
@@ -110,21 +115,15 @@ class _BlocHomeViewState extends State<BlocHomeView> {
         },
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: tasks.length,
-      itemBuilder: (_, index) {
-        final task = tasks[index];
-        return TaskTile(
-          key: ValueKey(task.id),
-          task: task,
-          onToggle: () => bloc.add(ToggleTaskEvent(task)),
-          onDelete: () => bloc.add(DeleteTaskEvent(task.id!)),
-          onEdit: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: bloc.updateTask)),
-          ),
-        );
-      },
+    return TaskListView(
+      key: _listKey,
+      tasks: tasks,
+      approachKey: 'bloc',
+      onToggle: (task) => bloc.add(ToggleTaskEvent(task)),
+      onDelete: (id) => bloc.add(DeleteTaskEvent(id)),
+      onEdit: (task) => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: bloc.updateTask)),
+      ),
     );
   }
 }

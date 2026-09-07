@@ -5,6 +5,11 @@ class PerformanceTracker {
   factory PerformanceTracker() => _instance;
   PerformanceTracker._internal();
 
+  /// Orçamento de um frame a 60 fps (mesmo `kBuildBudget` que o Flutter usa em
+  /// `missed_frame_build_budget_count`). Frames de scroll acima disso contam
+  /// como jank.
+  static const int kFrameBudgetMicros = 16666;
+
   final Map<String, int> _rebuildCounts = {};
   final Map<String, List<int>> _operationTimesMicros = {};
   final Map<String, List<double>> _memoryValues = {};
@@ -50,6 +55,12 @@ class PerformanceTracker {
     _memoryValues.clear();
   }
 
+  int _percentile(List<int> sortedValues, double p) {
+    if (sortedValues.isEmpty) return 0;
+    final index = ((sortedValues.length - 1) * p).round();
+    return sortedValues[index];
+  }
+
   String _formatTimeValue(int value) {
     if (value >= 1000000) {
       return '${(value / 1000000).toStringAsFixed(2)}s';
@@ -80,10 +91,13 @@ class PerformanceTracker {
 
       final dbTimes = <String, List<int>>{};
       final processTimes = <String, List<int>>{};
+      final scrollTimes = <String, List<int>>{};
 
       _operationTimesMicros.forEach((key, value) {
         if (key.startsWith('DB_')) {
           dbTimes[key] = value;
+        } else if (key.startsWith('SCROLL_')) {
+          scrollTimes[key] = value;
         } else {
           processTimes[key] = value;
         }
@@ -115,6 +129,25 @@ class PerformanceTracker {
             'min ${_formatTimeValue(min)} | '
             'max ${_formatTimeValue(max)} '
             '(${times.length} samples)',
+          );
+        });
+      }
+
+      if (scrollTimes.isNotEmpty) {
+        print('\n    SCROLL FRAME TIMES (jank = frame > ${_formatTimeValue(kFrameBudgetMicros)}):');
+        scrollTimes.forEach((operation, times) {
+          final sorted = List<int>.from(times)..sort();
+          final avg = times.reduce((a, b) => a + b) ~/ times.length;
+          final p90 = _percentile(sorted, 0.90);
+          final p99 = _percentile(sorted, 0.99);
+          final worst = sorted.last;
+          final jank = times.where((t) => t > kFrameBudgetMicros).length;
+          print(
+            '      $operation: avg ${_formatTimeValue(avg)} | '
+            'p90 ${_formatTimeValue(p90)} | '
+            'p99 ${_formatTimeValue(p99)} | '
+            'worst ${_formatTimeValue(worst)} | '
+            'jank $jank/${times.length} frames',
           );
         });
       }

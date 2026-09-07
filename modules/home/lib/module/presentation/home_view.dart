@@ -50,7 +50,7 @@ class HomeView extends StatelessWidget {
             _buildManagerButton(
               context,
               title: 'Riverpod',
-              subtitle: 'ProviderScope + StateNotifier',
+              subtitle: 'ProviderScope + Notifier',
               color: Colors.green,
               icon: Icons.code,
               route: '/task/riverpod',
@@ -59,7 +59,7 @@ class HomeView extends StatelessWidget {
             _buildManagerButton(
               context,
               title: 'GetX',
-              subtitle: 'GetxController + Obs',
+              subtitle: 'GetxController + Obx',
               color: Colors.orange,
               icon: Icons.code,
               route: '/task/getx',

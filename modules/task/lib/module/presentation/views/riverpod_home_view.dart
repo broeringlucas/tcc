@@ -13,6 +13,7 @@ class RiverpodHomeView extends ConsumerStatefulWidget {
 
 class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
   final TextEditingController _searchController = TextEditingController();
+  final GlobalKey<TaskListViewState> _listKey = GlobalKey();
   late final DebounceUtil _debounce;
 
   @override
@@ -43,6 +44,7 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
   Widget build(BuildContext context) {
     final state = ref.watch(riverpodTaskNotifierProvider);
     final notifier = ref.read(riverpodTaskNotifierProvider.notifier);
+    PerformanceTracker().recordRebuildWithContext('REBUILD_riverpod');
 
     return Scaffold(
       appBar: AppBar(
@@ -69,6 +71,9 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
               PopupMenuItem(value: '10000', child: Text('Load 10,000 tasks')),
               PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
             ],
+          ),
+          ScrollBenchmarkButton(
+            onRun: () async => _listKey.currentState?.runScrollBenchmark(),
           ),
           const PerfMenu(),
         ],
@@ -107,21 +112,15 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
         },
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: tasks.length,
-      itemBuilder: (_, index) {
-        final task = tasks[index];
-        return TaskTile(
-          key: ValueKey(task.id),
-          task: task,
-          onToggle: () => notifier.toggleTask(task),
-          onDelete: () => notifier.deleteTask(task.id!),
-          onEdit: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: notifier.updateTask)),
-          ),
-        );
-      },
+    return TaskListView(
+      key: _listKey,
+      tasks: tasks,
+      approachKey: 'riverpod',
+      onToggle: (task) => notifier.toggleTask(task),
+      onDelete: (id) => notifier.deleteTask(id),
+      onEdit: (task) => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: notifier.updateTask)),
+      ),
     );
   }
 }
