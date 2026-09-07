@@ -48,7 +48,9 @@ class _GetxHomeViewState extends State<GetxHomeView> {
       final controller = _controller;
       PerformanceTracker().recordRebuildWithContext('REBUILD_getx');
 
-      return Scaffold(
+      return Theme(
+        data: AppThemes.of(controller.isDarkMode),
+        child: Scaffold(
         appBar: AppBar(
           title: const Text('GetX - To-Do List'),
           backgroundColor: Colors.orange,
@@ -74,8 +76,11 @@ class _GetxHomeViewState extends State<GetxHomeView> {
                 PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
               ],
             ),
-            ScrollBenchmarkButton(
-              onRun: () async => _listKey.currentState?.runScrollBenchmark(),
+            ThemeToggleButton(isDark: controller.isDarkMode, onToggle: controller.toggleTheme),
+            BenchmarkMenu(
+              approachKey: 'getx',
+              onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+              onThemeToggle: controller.toggleTheme,
             ),
             const PerfMenu(),
           ],
@@ -91,6 +96,7 @@ class _GetxHomeViewState extends State<GetxHomeView> {
             MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: controller.addTask)),
           ),
           child: const Icon(Icons.add),
+        ),
         ),
       );
     });

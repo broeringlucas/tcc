@@ -46,7 +46,9 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
     final notifier = ref.read(riverpodTaskNotifierProvider.notifier);
     PerformanceTracker().recordRebuildWithContext('REBUILD_riverpod');
 
-    return Scaffold(
+    return Theme(
+      data: AppThemes.of(notifier.isDarkMode),
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Riverpod - To-Do List'),
         backgroundColor: Colors.green,
@@ -72,8 +74,11 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
               PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
             ],
           ),
-          ScrollBenchmarkButton(
-            onRun: () async => _listKey.currentState?.runScrollBenchmark(),
+          ThemeToggleButton(isDark: notifier.isDarkMode, onToggle: notifier.toggleTheme),
+          BenchmarkMenu(
+            approachKey: 'riverpod',
+            onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+            onThemeToggle: notifier.toggleTheme,
           ),
           const PerfMenu(),
         ],
@@ -89,6 +94,7 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
           MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: notifier.addTask)),
         ),
         child: const Icon(Icons.add),
+      ),
       ),
     );
   }

@@ -13,6 +13,7 @@ class RiverpodTaskNotifier extends Notifier<AsyncValue<List<TodoTask>>> {
   List<TodoTask> _filteredTasks = [];
   TodoTaskFilter _currentFilter = TodoTaskFilter.all;
   String _searchQuery = '';
+  bool _isDarkMode = false;
 
   @override
   AsyncValue<List<TodoTask>> build() {
@@ -27,6 +28,7 @@ class RiverpodTaskNotifier extends Notifier<AsyncValue<List<TodoTask>>> {
   bool get isLoading => state.isLoading;
   String? get error => state.error?.toString();
   TodoTaskFilter get currentFilter => _currentFilter;
+  bool get isDarkMode => _isDarkMode;
 
   void loadTasksWithFilter(TodoTaskFilter filter, int count) {
     _currentFilter = filter;
@@ -82,6 +84,11 @@ class RiverpodTaskNotifier extends Notifier<AsyncValue<List<TodoTask>>> {
     _currentFilter = filter;
     _applyFilters();
     state = AsyncValue.data(_filteredTasks);
+  }
+
+  void toggleTheme() {
+    _isDarkMode = !_isDarkMode;
+    state = AsyncValue.data([..._filteredTasks]);
   }
 
   void searchTasks(String query) {

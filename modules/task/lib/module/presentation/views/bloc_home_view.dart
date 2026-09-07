@@ -47,7 +47,9 @@ class _BlocHomeViewState extends State<BlocHomeView> {
         final bloc = context.read<TaskBloc>();
         PerformanceTracker().recordRebuildWithContext('REBUILD_bloc');
 
-        return Scaffold(
+        return Theme(
+          data: AppThemes.of(bloc.isDarkMode),
+          child: Scaffold(
           appBar: AppBar(
             title: const Text('BLoC - To-Do List'),
             backgroundColor: Colors.blue,
@@ -73,8 +75,11 @@ class _BlocHomeViewState extends State<BlocHomeView> {
                   PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
                 ],
               ),
-              ScrollBenchmarkButton(
-                onRun: () async => _listKey.currentState?.runScrollBenchmark(),
+              ThemeToggleButton(isDark: bloc.isDarkMode, onToggle: bloc.toggleTheme),
+              BenchmarkMenu(
+                approachKey: 'bloc',
+                onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+                onThemeToggle: bloc.toggleTheme,
               ),
               const PerfMenu(),
             ],
@@ -90,6 +95,7 @@ class _BlocHomeViewState extends State<BlocHomeView> {
               MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: bloc.addTask)),
             ),
             child: const Icon(Icons.add),
+          ),
           ),
         );
       },

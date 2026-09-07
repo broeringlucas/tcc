@@ -20,6 +20,7 @@ class TaskController extends GetxController {
   final RxBool _isLoading = true.obs;
   final RxnString _error = RxnString();
   final Rx<TodoTaskFilter> _currentFilter = TodoTaskFilter.all.obs;
+  final RxBool _isDarkMode = false.obs;
 
   List<TodoTask> _allTasks = [];
   String _searchQuery = '';
@@ -28,6 +29,7 @@ class TaskController extends GetxController {
   bool get isLoading => _isLoading.value;
   String? get error => _error.value;
   TodoTaskFilter get currentFilter => _currentFilter.value;
+  bool get isDarkMode => _isDarkMode.value;
 
   void loadTasksWithFilter(TodoTaskFilter filter, int count) {
     _currentFilter.value = filter;
@@ -85,6 +87,10 @@ class TaskController extends GetxController {
   void changeFilter(TodoTaskFilter filter) {
     _currentFilter.value = filter;
     _applyFilters();
+  }
+
+  void toggleTheme() {
+    _isDarkMode.value = !_isDarkMode.value;
   }
 
   void searchTasks(String query) {

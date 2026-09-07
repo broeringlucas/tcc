@@ -60,3 +60,7 @@ class UpdateTaskEvent extends TaskEvent {
   @override
   List<Object> get props => [task];
 }
+
+class ToggleThemeEvent extends TaskEvent {
+  const ToggleThemeEvent();
+}

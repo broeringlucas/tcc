@@ -15,11 +15,13 @@ class ProviderTaskNotifier extends ChangeNotifier {
   String _searchQuery = '';
   bool _isLoading = true;
   String? _error;
+  bool _isDarkMode = false;
 
   List<TodoTask> get tasks => _filteredTasks;
   bool get isLoading => _isLoading;
   String? get error => _error;
   TodoTaskFilter get currentFilter => _currentFilter;
+  bool get isDarkMode => _isDarkMode;
 
   ProviderTaskNotifier({
     required this._getTasks,
@@ -89,6 +91,11 @@ class ProviderTaskNotifier extends ChangeNotifier {
   void changeFilter(TodoTaskFilter filter) {
     _currentFilter = filter;
     _applyFilters();
+    notifyListeners();
+  }
+
+  void toggleTheme() {
+    _isDarkMode = !_isDarkMode;
     notifyListeners();
   }
 

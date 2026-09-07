@@ -5,9 +5,6 @@ class PerformanceTracker {
   factory PerformanceTracker() => _instance;
   PerformanceTracker._internal();
 
-  /// Orçamento de um frame a 60 fps (mesmo `kBuildBudget` que o Flutter usa em
-  /// `missed_frame_build_budget_count`). Frames de scroll acima disso contam
-  /// como jank.
   static const int kFrameBudgetMicros = 16666;
 
   final Map<String, int> _rebuildCounts = {};
@@ -91,13 +88,13 @@ class PerformanceTracker {
 
       final dbTimes = <String, List<int>>{};
       final processTimes = <String, List<int>>{};
-      final scrollTimes = <String, List<int>>{};
+      final frameTimes = <String, List<int>>{};
 
       _operationTimesMicros.forEach((key, value) {
         if (key.startsWith('DB_')) {
           dbTimes[key] = value;
-        } else if (key.startsWith('SCROLL_')) {
-          scrollTimes[key] = value;
+        } else if (key.startsWith('SCROLL_') || key.startsWith('THEME_')) {
+          frameTimes[key] = value;
         } else {
           processTimes[key] = value;
         }
@@ -133,9 +130,9 @@ class PerformanceTracker {
         });
       }
 
-      if (scrollTimes.isNotEmpty) {
-        print('\n    SCROLL FRAME TIMES (jank = frame > ${_formatTimeValue(kFrameBudgetMicros)}):');
-        scrollTimes.forEach((operation, times) {
+      if (frameTimes.isNotEmpty) {
+        print('\n    FRAME TIMES — SCROLL / THEME (jank = frame > ${_formatTimeValue(kFrameBudgetMicros)}):');
+        frameTimes.forEach((operation, times) {
           final sorted = List<int>.from(times)..sort();
           final avg = times.reduce((a, b) => a + b) ~/ times.length;
           final p90 = _percentile(sorted, 0.90);

@@ -12,6 +12,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   TodoTaskFilter _currentFilter = TodoTaskFilter.all;
   String _searchQuery = '';
   List<TodoTask> _allTasks = [];
+  bool _isDarkMode = false;
 
   TaskBloc({required this._getTasks, required this._addTask, required this._deleteTask, required this._updateTask})
     : super(TaskInitial()) {
@@ -22,9 +23,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<DeleteTaskEvent>(_onDeleteTask);
     on<ToggleTaskEvent>(_onToggleTask);
     on<UpdateTaskEvent>(_onUpdateTask);
+    on<ToggleThemeEvent>(_onToggleTheme);
   }
 
   TodoTaskFilter get currentFilter => _currentFilter;
+  bool get isDarkMode => _isDarkMode;
 
   void loadTasksWithFilter(TodoTaskFilter filter, int count) {
     add(LoadTasksWithFilter(filter: filter, count: count));
@@ -44,6 +47,10 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   void updateTask(TodoTask task) {
     add(UpdateTaskEvent(task));
+  }
+
+  void toggleTheme() {
+    add(const ToggleThemeEvent());
   }
 
   Future<void> _onLoadTasksWithFilter(LoadTasksWithFilter event, Emitter<TaskState> emit) async {
@@ -93,6 +100,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
           emit(TaskLoaded(filteredTasks, currentFilter: event.filter, searchQuery: event.searchQuery));
         },
       );
+    }
+  }
+
+  void _onToggleTheme(ToggleThemeEvent event, Emitter<TaskState> emit) {
+    _isDarkMode = !_isDarkMode;
+    final current = state;
+    if (current is TaskLoaded) {
+      emit(TaskLoaded(current.tasks, currentFilter: current.currentFilter, searchQuery: current.searchQuery));
     }
   }
 
