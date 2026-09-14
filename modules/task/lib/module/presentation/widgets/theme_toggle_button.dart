@@ -10,7 +10,7 @@ class ThemeToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
-      tooltip: 'Alternar tema',
+      tooltip: 'Toggle theme',
       onPressed: onToggle,
     );
   }

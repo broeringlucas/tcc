@@ -1,6 +1,7 @@
 import 'package:common/main.dart';
 import 'package:dependencies/flutter_modular.dart';
 import 'package:flutter/material.dart';
+import 'package:task/main.dart';
 
 class AppWidget extends StatefulWidget {
   const AppWidget({super.key});
@@ -43,7 +44,7 @@ class _AppWidgetState extends State<AppWidget> {
 
     return MaterialApp.router(
       title: 'To-Do List - State Management',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: AppThemes.light,
       routerConfig: Modular.routerConfig,
       debugShowCheckedModeBanner: false,
     );

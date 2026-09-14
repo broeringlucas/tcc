@@ -50,52 +50,36 @@ class _BlocHomeViewState extends State<BlocHomeView> {
         return Theme(
           data: AppThemes.of(bloc.isDarkMode),
           child: Scaffold(
-          appBar: AppBar(
-            title: const Text('BLoC - To-Do List'),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-            actions: [
-              FilterDropdown(
-                currentFilter: bloc.currentFilter,
-                onFilterChanged: (filter) => bloc.changeFilter(filter),
-              ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.play_arrow),
-                onSelected: (value) {
-                  final count = int.parse(value);
-                  if (count >= 0) {
-                    bloc.loadTasksWithFilter(bloc.currentFilter, count);
-                  }
-                },
-                tooltip: 'Load tasks',
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: '0', child: Text('Load all tasks')),
-                  PopupMenuItem(value: '1000', child: Text('Load 1,000 tasks')),
-                  PopupMenuItem(value: '10000', child: Text('Load 10,000 tasks')),
-                  PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
-                ],
-              ),
-              ThemeToggleButton(isDark: bloc.isDarkMode, onToggle: bloc.toggleTheme),
-              BenchmarkMenu(
-                approachKey: 'bloc',
-                onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
-                onThemeToggle: bloc.toggleTheme,
-              ),
-              const PerfMenu(),
-            ],
-          ),
-          body: Column(
-            children: [
-              CustomSearchBar(controller: _searchController),
-              Expanded(child: _buildBody(bloc, state)),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: bloc.addTask)),
+            appBar: AppBar(
+              title: const Text('BLoC'),
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              actions: [
+                FilterDropdown(
+                  currentFilter: bloc.currentFilter,
+                  onFilterChanged: (filter) => bloc.changeFilter(filter),
+                ),
+                LoadMenu(onLoad: (count) => bloc.loadTasksWithFilter(bloc.currentFilter, count)),
+                ThemeToggleButton(isDark: bloc.isDarkMode, onToggle: bloc.toggleTheme),
+                BenchmarkMenu(
+                  approachKey: 'bloc',
+                  onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+                  onThemeToggle: bloc.toggleTheme,
+                ),
+                const PerfMenu(),
+              ],
             ),
-            child: const Icon(Icons.add),
-          ),
+            body: Column(
+              children: [
+                CustomSearchBar(controller: _searchController),
+                Expanded(child: _buildBody(bloc, state)),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () =>
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: bloc.addTask))),
+              child: const Icon(Icons.add),
+            ),
           ),
         );
       },
@@ -128,7 +112,9 @@ class _BlocHomeViewState extends State<BlocHomeView> {
       onToggle: (task) => bloc.add(ToggleTaskEvent(task)),
       onDelete: (id) => bloc.add(DeleteTaskEvent(id)),
       onEdit: (task) => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: bloc.updateTask)),
+        MaterialPageRoute(
+          builder: (_) => EditTaskView(task: task, onSubmit: bloc.updateTask),
+        ),
       ),
     );
   }

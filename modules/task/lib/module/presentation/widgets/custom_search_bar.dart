@@ -4,7 +4,7 @@ class CustomSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
 
-  const CustomSearchBar({super.key, required this.controller, this.hintText = 'Buscar tarefas...'});
+  const CustomSearchBar({super.key, required this.controller, this.hintText = 'Search tasks...'});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,6 @@ class CustomSearchBar extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear, size: 20),

@@ -51,52 +51,37 @@ class _GetxHomeViewState extends State<GetxHomeView> {
       return Theme(
         data: AppThemes.of(controller.isDarkMode),
         child: Scaffold(
-        appBar: AppBar(
-          title: const Text('GetX - To-Do List'),
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-          actions: [
-            FilterDropdown(
-              currentFilter: controller.currentFilter,
-              onFilterChanged: (filter) => controller.changeFilter(filter),
-            ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.play_arrow),
-              onSelected: (value) {
-                final count = int.parse(value);
-                if (count >= 0) {
-                  controller.loadTasksWithFilter(controller.currentFilter, count);
-                }
-              },
-              tooltip: 'Load tasks',
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: '0', child: Text('Load all tasks')),
-                PopupMenuItem(value: '1000', child: Text('Load 1,000 tasks')),
-                PopupMenuItem(value: '10000', child: Text('Load 10,000 tasks')),
-                PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
-              ],
-            ),
-            ThemeToggleButton(isDark: controller.isDarkMode, onToggle: controller.toggleTheme),
-            BenchmarkMenu(
-              approachKey: 'getx',
-              onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
-              onThemeToggle: controller.toggleTheme,
-            ),
-            const PerfMenu(),
-          ],
-        ),
-        body: Column(
-          children: [
-            CustomSearchBar(controller: _searchController),
-            Expanded(child: _buildBody(controller)),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: controller.addTask)),
+          appBar: AppBar(
+            title: const Text('GetX'),
+            backgroundColor: Colors.orange,
+            foregroundColor: Colors.white,
+            actions: [
+              FilterDropdown(
+                currentFilter: controller.currentFilter,
+                onFilterChanged: (filter) => controller.changeFilter(filter),
+              ),
+              LoadMenu(onLoad: (count) => controller.loadTasksWithFilter(controller.currentFilter, count)),
+              ThemeToggleButton(isDark: controller.isDarkMode, onToggle: controller.toggleTheme),
+              BenchmarkMenu(
+                approachKey: 'getx',
+                onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+                onThemeToggle: controller.toggleTheme,
+              ),
+              const PerfMenu(),
+            ],
           ),
-          child: const Icon(Icons.add),
-        ),
+          body: Column(
+            children: [
+              CustomSearchBar(controller: _searchController),
+              Expanded(child: _buildBody(controller)),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () =>
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: controller.addTask))),
+            child: const Icon(Icons.add),
+          ),
         ),
       );
     });
@@ -128,7 +113,9 @@ class _GetxHomeViewState extends State<GetxHomeView> {
       onToggle: (task) => controller.toggleTask(task),
       onDelete: (id) => controller.deleteTask(id),
       onEdit: (task) => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: controller.updateTask)),
+        MaterialPageRoute(
+          builder: (_) => EditTaskView(task: task, onSubmit: controller.updateTask),
+        ),
       ),
     );
   }

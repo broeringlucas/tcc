@@ -50,13 +50,13 @@ class _AddTaskViewState extends State<AddTaskView> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
+              decoration: const InputDecoration(labelText: 'Title'),
               autofocus: true,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
+              decoration: const InputDecoration(labelText: 'Description'),
               maxLines: 3,
             ),
           ],

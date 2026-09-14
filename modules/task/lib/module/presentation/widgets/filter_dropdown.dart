@@ -16,7 +16,7 @@ class FilterDropdown extends StatelessWidget {
       itemBuilder: (_) => [
         const PopupMenuItem(
           value: TodoTaskFilter.all,
-          child: Row(children: [Icon(Icons.list, size: 20), SizedBox(width: 8), Text('Todas')]),
+          child: Row(children: [Icon(Icons.list, size: 20), SizedBox(width: 8), Text('All')]),
         ),
         const PopupMenuItem(
           value: TodoTaskFilter.pending,
@@ -24,7 +24,7 @@ class FilterDropdown extends StatelessWidget {
             children: [
               Icon(Icons.pending, size: 20, color: Colors.orange),
               SizedBox(width: 8),
-              Text('Pendentes'),
+              Text('Pending'),
             ],
           ),
         ),
@@ -34,7 +34,7 @@ class FilterDropdown extends StatelessWidget {
             children: [
               Icon(Icons.check_circle, size: 20, color: Colors.green),
               SizedBox(width: 8),
-              Text('Concluídas'),
+              Text('Completed'),
             ],
           ),
         ),

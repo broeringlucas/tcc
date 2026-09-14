@@ -53,7 +53,7 @@ class _BenchmarkMenuState extends State<BenchmarkMenu> {
   Future<void> _run(String kind) async {
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
-      SnackBar(content: Text('Benchmark de $kind iniciado…'), duration: const Duration(milliseconds: 2500)),
+      SnackBar(content: Text('$kind benchmark started…'), duration: const Duration(milliseconds: 2500)),
     );
     if (kind == 'scroll') {
       await widget.onRunScroll();
@@ -62,7 +62,7 @@ class _BenchmarkMenuState extends State<BenchmarkMenu> {
     }
     if (!mounted) return;
     messenger.showSnackBar(
-      const SnackBar(content: Text('Benchmark concluído — ver PerfMenu')),
+      const SnackBar(content: Text('Benchmark finished — see PerfMenu')),
     );
   }
 
@@ -73,8 +73,8 @@ class _BenchmarkMenuState extends State<BenchmarkMenu> {
       tooltip: 'Benchmarks',
       onSelected: _run,
       itemBuilder: (_) => const [
-        PopupMenuItem(value: 'scroll', child: Text('Rodar benchmark de scroll')),
-        PopupMenuItem(value: 'tema', child: Text('Rodar benchmark de tema')),
+        PopupMenuItem(value: 'scroll', child: Text('Run scroll benchmark')),
+        PopupMenuItem(value: 'theme', child: Text('Run theme benchmark')),
       ],
     );
   }

@@ -6,11 +6,11 @@ class CustomDateUtils {
 
     String dayText;
     if (dateOnly == today) {
-      dayText = 'Hoje';
+      dayText = 'Today';
     } else if (dateOnly == today.subtract(const Duration(days: 1))) {
-      dayText = 'Ontem';
+      dayText = 'Yesterday';
     } else if (dateOnly.isAfter(today.subtract(const Duration(days: 7)))) {
-      const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       dayText = weekdays[date.weekday % 7];
     } else {
       dayText = '${date.day}/${date.month}/${date.year}';

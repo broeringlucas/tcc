@@ -1,11 +1,14 @@
 import 'package:common/main.dart';
 import 'package:dependencies/dartz.dart';
+import 'package:dependencies/equatable.dart';
 
 import '../../../main.dart';
 
-class UpdateTaskParams {
+class UpdateTaskParams extends Equatable {
   final TodoTask task;
-  UpdateTaskParams(this.task);
+  const UpdateTaskParams(this.task);
+  @override
+  List<Object> get props => [task];
 }
 
 class UpdateTask implements UseCase<void, UpdateTaskParams> {

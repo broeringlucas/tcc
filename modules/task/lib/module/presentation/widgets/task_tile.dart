@@ -34,43 +34,59 @@ class _TaskTileState extends State<TaskTile> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Checkbox(
-        value: _completed,
-        onChanged: (_) {
-          setState(() {
-            _completed = !_completed;
-          });
-          widget.onToggle();
-        },
-      ),
-      title: Text(
-        widget.task.title,
-        style: TextStyle(decoration: widget.task.completed ? TextDecoration.lineThrough : null),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.task.description.isNotEmpty) Text(widget.task.description),
-          Text(
-            CustomDateUtils.formatDate(widget.task.createdAt),
-            style: const TextStyle(fontSize: 10, color: Colors.grey),
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        contentPadding: const EdgeInsets.only(left: 8, right: 4, top: 2, bottom: 2),
+        leading: Checkbox(
+          value: _completed,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          onChanged: (_) {
+            setState(() {
+              _completed = !_completed;
+            });
+            widget.onToggle();
+          },
+        ),
+        title: Text(
+          widget.task.title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            decoration: widget.task.completed ? TextDecoration.lineThrough : null,
+            color: widget.task.completed ? Theme.of(context).disabledColor : null,
           ),
-        ],
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.onEdit != null)
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
-              onPressed: widget.onEdit,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.task.description.isNotEmpty)
+              Padding(padding: const EdgeInsets.only(top: 2), child: Text(widget.task.description)),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                CustomDateUtils.formatDate(widget.task.createdAt),
+                style: TextStyle(fontSize: 11, color: Theme.of(context).hintColor),
+              ),
             ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: widget.onDelete,
-          ),
-        ],
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.onEdit != null)
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: 'Edit',
+                onPressed: widget.onEdit,
+              ),
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+              tooltip: 'Delete',
+              onPressed: widget.onDelete,
+            ),
+          ],
+        ),
       ),
     );
   }

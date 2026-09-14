@@ -23,7 +23,7 @@ class EmptyState extends StatelessWidget {
           Text(_getMessage(), style: TextStyle(color: Colors.grey.shade600)),
           if (hasSearch || hasFilter) ...[
             const SizedBox(height: 8),
-            TextButton(onPressed: onClearFilters, child: const Text('Limpar filtros')),
+            TextButton(onPressed: onClearFilters, child: const Text('Clear filters')),
           ],
         ],
       ),
@@ -46,15 +46,15 @@ class EmptyState extends StatelessWidget {
 
   String _getMessage() {
     if (searchQuery.isNotEmpty) {
-      return 'Nenhuma tarefa encontrada para "$searchQuery"';
+      return 'No tasks found for "$searchQuery"';
     }
     switch (filter) {
       case TodoTaskFilter.pending:
-        return 'Nenhuma tarefa pendente';
+        return 'No pending tasks';
       case TodoTaskFilter.completed:
-        return 'Nenhuma tarefa concluída';
+        return 'No completed tasks';
       default:
-        return 'Nenhuma tarefa encontrada';
+        return 'No tasks found';
     }
   }
 }

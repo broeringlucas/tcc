@@ -8,7 +8,7 @@ class PerfMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.assessment),
-      tooltip: 'Métricas',
+      tooltip: 'Metrics',
       onSelected: (value) {
         final tracker = PerformanceTracker();
         if (value == 'print') {
@@ -18,8 +18,8 @@ class PerfMenu extends StatelessWidget {
         }
       },
       itemBuilder: (_) => const [
-        PopupMenuItem(value: 'print', child: Text('Imprimir resumo')),
-        PopupMenuItem(value: 'reset', child: Text('Zerar métricas')),
+        PopupMenuItem(value: 'print', child: Text('Print summary')),
+        PopupMenuItem(value: 'reset', child: Text('Reset metrics')),
       ],
     );
   }

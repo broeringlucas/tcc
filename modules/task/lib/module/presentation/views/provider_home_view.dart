@@ -49,52 +49,37 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
         return Theme(
           data: AppThemes.of(notifier.isDarkMode),
           child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Provider - To-Do List'),
-            backgroundColor: Colors.purple,
-            foregroundColor: Colors.white,
-            actions: [
-              FilterDropdown(
-                currentFilter: notifier.currentFilter,
-                onFilterChanged: (filter) => notifier.changeFilter(filter),
-              ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.play_arrow),
-                onSelected: (value) {
-                  final count = int.parse(value);
-                  if (count >= 0) {
-                    notifier.loadTasksWithFilter(notifier.currentFilter, count);
-                  }
-                },
-                tooltip: 'Load tasks',
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: '0', child: Text('Load all tasks')),
-                  PopupMenuItem(value: '1000', child: Text('Load 1,000 tasks')),
-                  PopupMenuItem(value: '10000', child: Text('Load 10,000 tasks')),
-                  PopupMenuItem(value: '100000', child: Text('Load 100,000 tasks')),
-                ],
-              ),
-              ThemeToggleButton(isDark: notifier.isDarkMode, onToggle: notifier.toggleTheme),
-              BenchmarkMenu(
-                approachKey: 'provider',
-                onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
-                onThemeToggle: notifier.toggleTheme,
-              ),
-              const PerfMenu(),
-            ],
-          ),
-          body: Column(
-            children: [
-              CustomSearchBar(controller: _searchController),
-              Expanded(child: _buildBody(notifier)),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: notifier.addTask)),
+            appBar: AppBar(
+              title: const Text('Provider'),
+              backgroundColor: Colors.purple,
+              foregroundColor: Colors.white,
+              actions: [
+                FilterDropdown(
+                  currentFilter: notifier.currentFilter,
+                  onFilterChanged: (filter) => notifier.changeFilter(filter),
+                ),
+                LoadMenu(onLoad: (count) => notifier.loadTasksWithFilter(notifier.currentFilter, count)),
+                ThemeToggleButton(isDark: notifier.isDarkMode, onToggle: notifier.toggleTheme),
+                BenchmarkMenu(
+                  approachKey: 'provider',
+                  onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+                  onThemeToggle: notifier.toggleTheme,
+                ),
+                const PerfMenu(),
+              ],
             ),
-            child: const Icon(Icons.add),
-          ),
+            body: Column(
+              children: [
+                CustomSearchBar(controller: _searchController),
+                Expanded(child: _buildBody(notifier)),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () =>
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: notifier.addTask))),
+              child: const Icon(Icons.add),
+            ),
           ),
         );
       },
@@ -127,7 +112,9 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
       onToggle: (task) => notifier.toggleTask(task),
       onDelete: (id) => notifier.deleteTask(id),
       onEdit: (task) => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => EditTaskView(task: task, onSubmit: notifier.updateTask)),
+        MaterialPageRoute(
+          builder: (_) => EditTaskView(task: task, onSubmit: notifier.updateTask),
+        ),
       ),
     );
   }

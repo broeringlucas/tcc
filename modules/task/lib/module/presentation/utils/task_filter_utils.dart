@@ -26,10 +26,4 @@ class TaskFilterUtils {
     final byStatus = filterByStatus(tasks, filter);
     return filterBySearch(byStatus, query);
   }
-
-  static List<TodoTask> sortByDate(List<TodoTask> tasks) {
-    final sorted = List<TodoTask>.from(tasks);
-    sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return sorted;
-  }
 }
