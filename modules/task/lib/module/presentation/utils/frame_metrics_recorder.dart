@@ -14,7 +14,10 @@ class FrameMetricsRecorder {
     _buildKey = '${prefix}_BUILD_$approachKey';
     _rasterKey = '${prefix}_RASTER_$approachKey';
     _active = true;
-    PerformanceTracker().recordBenchmarkRun('${prefix}_$approachKey');
+    final tracker = PerformanceTracker();
+    tracker.recordBenchmarkRun('${prefix}_$approachKey');
+    tracker.beginFrameRun(_buildKey);
+    tracker.beginFrameRun(_rasterKey);
   }
 
   void stop() => _active = false;
@@ -23,8 +26,8 @@ class FrameMetricsRecorder {
     if (!_active) return;
     final tracker = PerformanceTracker();
     for (final timing in timings) {
-      tracker.recordOperationMicros(_buildKey, timing.buildDuration.inMicroseconds);
-      tracker.recordOperationMicros(_rasterKey, timing.rasterDuration.inMicroseconds);
+      tracker.recordFrameMicros(_buildKey, timing.buildDuration.inMicroseconds);
+      tracker.recordFrameMicros(_rasterKey, timing.rasterDuration.inMicroseconds);
     }
   }
 }

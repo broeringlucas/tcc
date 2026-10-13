@@ -101,22 +101,24 @@ class ProviderTaskNotifier extends ChangeNotifier {
 
   void searchTasks(String query) {
     final tracker = PerformanceTracker();
+    final queryKey = query.isEmpty ? 'empty' : query;
 
     _searchQuery = query;
 
     final memBefore = tracker.getCurrentMemoryMB();
 
     final stopwatch = Stopwatch()..start();
-    _applyFilters();
+    _filteredTasks = TaskFilterUtils.applyFilters(_allTasks, _currentFilter, _searchQuery);
+    final filterMicros = stopwatch.elapsedMicroseconds;
+    notifyListeners();
     stopwatch.stop();
 
-    tracker.recordOperationMicros('SEARCH_${query.isEmpty ? "empty" : query}_tasks', stopwatch.elapsedMicroseconds);
+    tracker.recordOperationMicros('SEARCH_FILTER_$queryKey', filterMicros);
+    tracker.recordOperationMicros('SEARCH_${queryKey}_tasks', stopwatch.elapsedMicroseconds);
 
     final memAfter = tracker.getCurrentMemoryMB();
-    tracker.recordMemory('SEARCH_BEFORE_${query.isEmpty ? "empty" : query}', memBefore);
-    tracker.recordMemory('SEARCH_AFTER_${query.isEmpty ? "empty" : query}', memAfter);
-
-    notifyListeners();
+    tracker.recordMemory('SEARCH_BEFORE_$queryKey', memBefore);
+    tracker.recordMemory('SEARCH_AFTER_$queryKey', memAfter);
   }
 
   void _applyFilters() {

@@ -62,7 +62,9 @@ class _RiverpodHomeViewState extends ConsumerState<RiverpodHomeView> {
             ThemeToggleButton(isDark: notifier.isDarkMode, onToggle: notifier.toggleTheme),
             BenchmarkMenu(
               approachKey: 'riverpod',
-              onRunScroll: () async => await _listKey.currentState?.runScrollBenchmark() ?? 0,
+              onLoad: (count) => notifier.loadTasksWithFilter(TodoTaskFilter.all, count),
+              onSearch: (query) => _searchController.text = query,
+              onRunScroll: () => waitAndRunScrollBenchmark(_listKey),
               onThemeToggle: notifier.toggleTheme,
             ),
             const PerfMenu(),

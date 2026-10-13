@@ -1,3 +1,4 @@
+import 'package:common/main.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
@@ -22,10 +23,15 @@ class TaskListView extends StatefulWidget {
   State<TaskListView> createState() => TaskListViewState();
 }
 
+Future<int> waitAndRunScrollBenchmark(GlobalKey<TaskListViewState> key) async {
+  final deadline = DateTime.now().add(const Duration(seconds: 3));
+  while (key.currentState == null && DateTime.now().isBefore(deadline)) {
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+  }
+  return key.currentState?.runScrollBenchmark() ?? 0;
+}
+
 class TaskListViewState extends State<TaskListView> {
-  // Protocolo documentado no CLAUDE.md / 04_metodologia.tex: 10 execuções,
-  // descartando a 1ª (aquecimento de shader/JIT) — aqui rodadas automaticamente
-  // numa única chamada, em vez de depender de 10 cliques manuais no benchmark.
   static const int _scrollRuns = 10;
   static const double _scrollDistance = 5000;
   static const Duration _scrollDuration = Duration(seconds: 2);
@@ -47,22 +53,30 @@ class TaskListViewState extends State<TaskListView> {
     super.dispose();
   }
 
-  /// Roda o benchmark de scroll `_scrollRuns` vezes (+1 aquecimento descartado)
-  /// e só então retorna — o print do resumo deve ser disparado depois, pelo
-  /// `PerfMenu`. Retorna o número de execuções efetivamente registradas.
   Future<int> runScrollBenchmark() async {
-    if (_running || !_scrollController.hasClients) return 0;
+    if (_running) return 0;
 
-    final maxExtent = _scrollController.position.maxScrollExtent;
+    var maxExtent = 0.0;
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (DateTime.now().isBefore(deadline)) {
+      if (_scrollController.hasClients) {
+        maxExtent = _scrollController.position.maxScrollExtent;
+        if (maxExtent > 0) break;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
     if (maxExtent <= 0) return 0;
 
     _running = true;
     final target = _scrollDistance.clamp(0.0, maxExtent);
     var recorded = 0;
 
+    final tracker = PerformanceTracker();
+
     try {
       for (var run = 0; run <= _scrollRuns; run++) {
         final isWarmup = run == 0;
+        if (isWarmup) tracker.muted = true;
 
         _scrollController.jumpTo(0);
         await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -74,9 +88,12 @@ class TaskListViewState extends State<TaskListView> {
           _recorder.stop();
           recorded++;
         }
+
+        if (isWarmup) tracker.muted = false;
       }
     } finally {
       _running = false;
+      tracker.muted = false;
     }
 
     return recorded;

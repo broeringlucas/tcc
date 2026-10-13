@@ -25,6 +25,13 @@ class _AppWidgetState extends State<AppWidget> {
     setState(() {
       _isDatabaseReady = true;
     });
+
+    const autoApproach = String.fromEnvironment('AUTO_APPROACH');
+    if (autoApproach.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Modular.to.navigate('/task/$autoApproach');
+      });
+    }
   }
 
   @override

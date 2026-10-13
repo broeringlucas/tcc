@@ -64,7 +64,9 @@ class _GetxHomeViewState extends State<GetxHomeView> {
               ThemeToggleButton(isDark: controller.isDarkMode, onToggle: controller.toggleTheme),
               BenchmarkMenu(
                 approachKey: 'getx',
-                onRunScroll: () async => await _listKey.currentState?.runScrollBenchmark() ?? 0,
+                onLoad: (count) => controller.loadTasksWithFilter(TodoTaskFilter.all, count),
+                onSearch: (query) => _searchController.text = query,
+                onRunScroll: () => waitAndRunScrollBenchmark(_listKey),
                 onThemeToggle: controller.toggleTheme,
               ),
               const PerfMenu(),

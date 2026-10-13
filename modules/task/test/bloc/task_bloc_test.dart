@@ -19,6 +19,7 @@ void main() {
   setUpAll(registerTaskFallbackValues);
 
   setUp(() {
+    PerformanceTracker().reset();
     mockGetTasks = MockGetTasks();
     mockAddTask = MockAddTask();
     mockDeleteTask = MockDeleteTask();
@@ -76,6 +77,11 @@ void main() {
       isA<TaskLoaded>().having((s) => s.tasks.length, 'tasks', 3),
       isA<TaskLoaded>().having((s) => s.tasks.map((t) => t.id).toList(), 'ids', [2]),
     ],
+    verify: (_) {
+      final tracker = PerformanceTracker();
+      expect(tracker.tickCount('SEARCH_FILTER_Task 2'), 1);
+      expect(tracker.tickCount('SEARCH_Task 2_tasks'), 1);
+    },
   );
 
   blocTest<TaskBloc, TaskState>(

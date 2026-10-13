@@ -50,3 +50,6 @@ app.*.map.json
 # FVM
 .fvm/
 .fvmrc
+
+# Coleta automática do protocolo (tool/run_protocol.ps1)
+/results/

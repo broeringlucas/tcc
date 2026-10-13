@@ -119,6 +119,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onSearchTasks(SearchTasksEvent event, Emitter<TaskState> emit) async {
     final tracker = PerformanceTracker();
+    final queryKey = event.query.isEmpty ? 'empty' : event.query;
 
     _searchQuery = event.query;
 
@@ -126,18 +127,16 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
     final stopwatch = Stopwatch()..start();
     final result = TaskFilterUtils.applyFilters(_allTasks, _currentFilter, event.query);
+    final filterMicros = stopwatch.elapsedMicroseconds;
+    emit(TaskLoaded(result, currentFilter: _currentFilter, searchQuery: event.query));
     stopwatch.stop();
 
-    tracker.recordOperationMicros(
-      'SEARCH_${event.query.isEmpty ? "empty" : event.query}_tasks',
-      stopwatch.elapsedMicroseconds,
-    );
+    tracker.recordOperationMicros('SEARCH_FILTER_$queryKey', filterMicros);
+    tracker.recordOperationMicros('SEARCH_${queryKey}_tasks', stopwatch.elapsedMicroseconds);
 
     final memAfter = tracker.getCurrentMemoryMB();
-    tracker.recordMemory('SEARCH_BEFORE_${event.query.isEmpty ? "empty" : event.query}', memBefore);
-    tracker.recordMemory('SEARCH_AFTER_${event.query.isEmpty ? "empty" : event.query}', memAfter);
-
-    emit(TaskLoaded(result, currentFilter: _currentFilter, searchQuery: event.query));
+    tracker.recordMemory('SEARCH_BEFORE_$queryKey', memBefore);
+    tracker.recordMemory('SEARCH_AFTER_$queryKey', memAfter);
   }
 
   Future<void> _onAddTask(AddTaskEvent event, Emitter<TaskState> emit) async {

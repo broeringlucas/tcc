@@ -20,6 +20,7 @@ void main() {
   setUpAll(registerTaskFallbackValues);
 
   setUp(() {
+    PerformanceTracker().reset();
     mockGetTasks = MockGetTasks();
     mockAddTask = MockAddTask();
     mockDeleteTask = MockDeleteTask();
@@ -68,6 +69,9 @@ void main() {
     notifier.searchTasks('Task 2');
 
     expect(notifier.tasks.map((t) => t.id).toList(), [2]);
+    final tracker = PerformanceTracker();
+    expect(tracker.tickCount('SEARCH_FILTER_Task 2'), 1);
+    expect(tracker.tickCount('SEARCH_Task 2_tasks'), 1);
   });
 
   test('adiciona uma tarefa e recarrega a lista', () async {
