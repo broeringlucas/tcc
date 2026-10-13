@@ -10,6 +10,7 @@ class PerformanceTracker {
   final Map<String, int> _rebuildCounts = {};
   final Map<String, List<int>> _operationTimesMicros = {};
   final Map<String, List<double>> _memoryValues = {};
+  final Map<String, int> _benchmarkRuns = {};
 
   void recordRebuild(String widgetName) {
     _rebuildCounts[widgetName] = (_rebuildCounts[widgetName] ?? 0) + 1;
@@ -46,10 +47,18 @@ class PerformanceTracker {
     _memoryValues[operationName]!.add(memoryMB);
   }
 
+  /// Conta uma execução completa de um benchmark (ex.: 1 passagem de scroll,
+  /// 1 sessão de N trocas de tema) — diferente das amostras por frame
+  /// gravadas em `recordOperationMicros`, que são muitas por execução.
+  void recordBenchmarkRun(String key) {
+    _benchmarkRuns[key] = (_benchmarkRuns[key] ?? 0) + 1;
+  }
+
   void reset() {
     _rebuildCounts.clear();
     _operationTimesMicros.clear();
     _memoryValues.clear();
+    _benchmarkRuns.clear();
   }
 
   int _percentile(List<int> sortedValues, double p) {
@@ -139,12 +148,16 @@ class PerformanceTracker {
           final p99 = _percentile(sorted, 0.99);
           final worst = sorted.last;
           final jank = times.where((t) => t > kFrameBudgetMicros).length;
+          final runKey = operation.replaceFirst('_BUILD_', '_').replaceFirst('_RASTER_', '_');
+          final runs = _benchmarkRuns[runKey];
+          final runsLabel = runs != null ? ' | $runs run(s)' : '';
           print(
             '      $operation: avg ${_formatTimeValue(avg)} | '
             'p90 ${_formatTimeValue(p90)} | '
             'p99 ${_formatTimeValue(p99)} | '
             'worst ${_formatTimeValue(worst)} | '
-            'jank $jank/${times.length} frames',
+            'jank $jank/${times.length} frames'
+            '$runsLabel',
           );
         });
       }

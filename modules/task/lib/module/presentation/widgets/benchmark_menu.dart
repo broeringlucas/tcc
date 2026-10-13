@@ -4,7 +4,7 @@ import '../../../main.dart';
 
 class BenchmarkMenu extends StatefulWidget {
   final String approachKey;
-  final Future<void> Function() onRunScroll;
+  final Future<int> Function() onRunScroll;
   final VoidCallback onThemeToggle;
 
   const BenchmarkMenu({
@@ -55,15 +55,18 @@ class _BenchmarkMenuState extends State<BenchmarkMenu> {
     messenger.showSnackBar(
       SnackBar(content: Text('$kind benchmark started…'), duration: const Duration(milliseconds: 2500)),
     );
+
+    String resultMessage;
     if (kind == 'scroll') {
-      await widget.onRunScroll();
+      final runs = await widget.onRunScroll();
+      resultMessage = 'Scroll benchmark finished — $runs run(s) recorded. See PerfMenu.';
     } else {
       await _runThemeBenchmark();
+      resultMessage = 'Theme benchmark finished — $_themeToggles toggles recorded. See PerfMenu.';
     }
+
     if (!mounted) return;
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Benchmark finished — see PerfMenu')),
-    );
+    messenger.showSnackBar(SnackBar(content: Text(resultMessage)));
   }
 
   @override

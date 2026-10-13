@@ -63,7 +63,7 @@ class _BlocHomeViewState extends State<BlocHomeView> {
                 ThemeToggleButton(isDark: bloc.isDarkMode, onToggle: bloc.toggleTheme),
                 BenchmarkMenu(
                   approachKey: 'bloc',
-                  onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+                  onRunScroll: () async => await _listKey.currentState?.runScrollBenchmark() ?? 0,
                   onThemeToggle: bloc.toggleTheme,
                 ),
                 const PerfMenu(),

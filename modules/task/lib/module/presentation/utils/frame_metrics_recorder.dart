@@ -14,6 +14,7 @@ class FrameMetricsRecorder {
     _buildKey = '${prefix}_BUILD_$approachKey';
     _rasterKey = '${prefix}_RASTER_$approachKey';
     _active = true;
+    PerformanceTracker().recordBenchmarkRun('${prefix}_$approachKey');
   }
 
   void stop() => _active = false;

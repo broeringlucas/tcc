@@ -62,7 +62,7 @@ class _ProviderHomeViewState extends State<ProviderHomeView> {
                 ThemeToggleButton(isDark: notifier.isDarkMode, onToggle: notifier.toggleTheme),
                 BenchmarkMenu(
                   approachKey: 'provider',
-                  onRunScroll: () async => _listKey.currentState?.runScrollBenchmark(),
+                  onRunScroll: () async => await _listKey.currentState?.runScrollBenchmark() ?? 0,
                   onThemeToggle: notifier.toggleTheme,
                 ),
                 const PerfMenu(),
