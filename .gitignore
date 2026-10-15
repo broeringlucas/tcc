@@ -53,3 +53,4 @@ app.*.map.json
 
 # Coleta automática do protocolo (tool/run_protocol.ps1)
 /results/
+/results_recursos/
