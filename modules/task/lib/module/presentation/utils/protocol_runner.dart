@@ -44,7 +44,7 @@ class ProtocolRunner {
     : session = session ?? const String.fromEnvironment('SESSION_ID', defaultValue: 'local'),
       order = order ?? const String.fromEnvironment('RUN_ORDER', defaultValue: ''),
       position = position ?? const int.fromEnvironment('RUN_POSITION', defaultValue: 0),
-      flutterVersion = flutterVersion ?? const String.fromEnvironment('FLUTTER_VERSION', defaultValue: 'unknown');
+      flutterVersion = flutterVersion ?? const String.fromEnvironment('APP_FLUTTER_VERSION', defaultValue: 'unknown');
 
   Future<void> run() async {
     if (kDebugMode) {

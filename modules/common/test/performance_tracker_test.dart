@@ -118,10 +118,35 @@ void main() {
 
     expect(dbLines.length, greaterThan(1));
     for (final line in dbLines) {
-      expect(line.length, lessThanOrEqualTo(3100));
+      expect(line.length, lessThanOrEqualTo(900));
       final decoded = jsonDecode(line.substring('PERF '.length)) as Map<String, dynamic>;
       expect(decoded['part'], isNotNull);
       expect(decoded['parts'], dbLines.length);
     }
+  });
+
+  test('exportJsonLines mantém linhas dentro do limite do logcat e reconstrói as amostras originais', () {
+    final originalSamples = List<int>.generate(400, (i) => 10000 + i);
+    for (final sample in originalSamples) {
+      tracker.recordOperationMicros('DB_all_100000', sample);
+    }
+
+    final lines = tracker.exportJsonLines(session: 's1', approach: 'bloc', scenario: 'load');
+    final dbLines = lines.where((l) => l.contains('"key":"DB_all_100000"')).toList();
+
+    for (final line in dbLines) {
+      expect(line.length, lessThanOrEqualTo(900));
+    }
+
+    final decodedParts = dbLines.map((l) => jsonDecode(l.substring('PERF '.length)) as Map<String, dynamic>).toList()
+      ..sort((a, b) => (a['part'] as int).compareTo(b['part'] as int));
+
+    final reconstructed = <int>[];
+    for (final part in decodedParts) {
+      expect(part['n'], originalSamples.length);
+      reconstructed.addAll((part['samples'] as List).cast<int>());
+    }
+
+    expect(reconstructed, originalSamples);
   });
 }

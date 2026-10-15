@@ -7,7 +7,7 @@ class PerformanceTracker {
   PerformanceTracker._internal();
 
   static const int kFrameBudgetMicros = 16666;
-  static const int _maxJsonLineLength = 3000;
+  static const int _maxJsonLineLength = 800;
 
   bool muted = false;
 
@@ -299,8 +299,10 @@ class PerformanceTracker {
   String _perfLine(Map<String, dynamic> fields) => 'PERF ${jsonEncode(fields)}';
 
   List<String> _encodeSampleLines(Map<String, dynamic> base, List<num> samples) {
+    final withCount = {...base, 'n': samples.length};
+
     if (samples.isEmpty) {
-      return [_perfLine({...base, 'samples': const <num>[]})];
+      return [_perfLine({...withCount, 'samples': const <num>[]})];
     }
 
     var chunkSize = samples.length;
@@ -311,18 +313,18 @@ class PerformanceTracker {
         final end = (i + chunkSize < samples.length) ? i + chunkSize : samples.length;
         chunks.add(samples.sublist(i, end));
       }
-      final probe = _perfLine({...base, 'samples': chunks.first});
+      final probe = _perfLine({...withCount, 'samples': chunks.first});
       if (probe.length <= _maxJsonLineLength || chunkSize == 1) break;
       chunkSize = (chunkSize / 2).ceil();
     }
 
     if (chunks.length == 1) {
-      return [_perfLine({...base, 'samples': chunks.first})];
+      return [_perfLine({...withCount, 'samples': chunks.first})];
     }
 
     return [
       for (var i = 0; i < chunks.length; i++)
-        _perfLine({...base, 'part': i + 1, 'parts': chunks.length, 'samples': chunks[i]}),
+        _perfLine({...withCount, 'part': i + 1, 'parts': chunks.length, 'samples': chunks[i]}),
     ];
   }
 }
