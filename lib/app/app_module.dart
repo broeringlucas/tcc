@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:dependencies/flutter_modular.dart';
+import 'package:home/module/home_module.dart';
+import 'package:task/module/task_module.dart';
 
 class AppModule extends Module {
   @override
@@ -10,26 +11,7 @@ class AppModule extends Module {
 
   @override
   void routes(r) {
-    r.child('/', child: (_) => const _PlaceholderScreen());
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('To-Do List - TCC')),
-      body: const Center(
-        child: Text(
-          'Aplicação rodando!\n\n'
-              'Estrutura configurada com sucesso.\n'
-              'Próximo passo: implementar o módulo Home.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
-        ),
-      ),
-    );
+    r.module('/', module: HomeModule());
+    r.module('/task', module: TaskModule());
   }
 }

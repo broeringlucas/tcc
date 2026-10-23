@@ -1,17 +1,57 @@
-import 'package:flutter/material.dart';
+import 'package:common/main.dart';
 import 'package:dependencies/flutter_modular.dart';
+import 'package:flutter/material.dart';
+import 'package:task/main.dart';
 
-class AppWidget extends StatelessWidget {
+class AppWidget extends StatefulWidget {
   const AppWidget({super.key});
 
   @override
+  State<AppWidget> createState() => _AppWidgetState();
+}
+
+class _AppWidgetState extends State<AppWidget> {
+  bool _isDatabaseReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _prepareDatabase();
+  }
+
+  Future<void> _prepareDatabase() async {
+    final db = AppDatabase();
+    await db.ensureSeeded();
+    setState(() {
+      _isDatabaseReady = true;
+    });
+
+    const autoApproach = String.fromEnvironment('AUTO_APPROACH');
+    if (autoApproach.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Modular.to.navigate('/task/$autoApproach');
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_isDatabaseReady) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Preparing database...')],
+            ),
+          ),
+        ),
+      );
+    }
+
     return MaterialApp.router(
       title: 'To-Do List - State Management',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: AppThemes.light,
       routerConfig: Modular.routerConfig,
       debugShowCheckedModeBanner: false,
     );

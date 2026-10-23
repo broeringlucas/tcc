@@ -1,0 +1,18 @@
+name: home
+description: "Home module with home features"
+version: 0.0.1
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: ^3.13.1
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  common:
+    path: ../common
+  dependencies:
+    path: ../dependencies

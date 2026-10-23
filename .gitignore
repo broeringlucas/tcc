@@ -30,7 +30,7 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
+build/
 /coverage/
 
 # Symbolication related
@@ -50,3 +50,7 @@ app.*.map.json
 # FVM
 .fvm/
 .fvmrc
+
+# Coleta automática do protocolo (tool/run_protocol.ps1)
+/results/
+/results_recursos/

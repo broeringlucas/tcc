@@ -1,0 +1,123 @@
+import 'package:common/main.dart';
+import 'package:dependencies/bloc.dart';
+import 'package:flutter/material.dart';
+
+import '../../../main.dart';
+
+class BlocHomeView extends StatefulWidget {
+  const BlocHomeView({super.key});
+
+  @override
+  State<BlocHomeView> createState() => _BlocHomeViewState();
+}
+
+class _BlocHomeViewState extends State<BlocHomeView> {
+  final TextEditingController _searchController = TextEditingController();
+  final GlobalKey<TaskListViewState> _listKey = GlobalKey();
+  late final DebounceUtil _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _debounce = DebounceUtil();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TaskBloc>().loadTasksWithFilter(TodoTaskFilter.all, 0);
+    });
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text;
+    _debounce.run(() {
+      context.read<TaskBloc>().searchTasks(query);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TaskBloc, TaskState>(
+      builder: (context, state) {
+        final bloc = context.read<TaskBloc>();
+        PerformanceTracker().recordRebuildWithContext('REBUILD_bloc');
+
+        return Theme(
+          data: AppThemes.of(bloc.isDarkMode),
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('BLoC'),
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              actions: [
+                FilterDropdown(
+                  currentFilter: bloc.currentFilter,
+                  onFilterChanged: (filter) => bloc.changeFilter(filter),
+                ),
+                LoadMenu(onLoad: (count) => bloc.loadTasksWithFilter(bloc.currentFilter, count)),
+                ThemeToggleButton(isDark: bloc.isDarkMode, onToggle: bloc.toggleTheme),
+                BenchmarkMenu(
+                  approachKey: 'bloc',
+                  onLoad: (count) => bloc.loadTasksWithFilter(TodoTaskFilter.all, count),
+                  onSearch: (query) => _searchController.text = query,
+                  onRunScroll: () => waitAndRunScrollBenchmark(_listKey),
+                  onThemeToggle: bloc.toggleTheme,
+                ),
+                const PerfMenu(),
+              ],
+            ),
+            body: Column(
+              children: [
+                CustomSearchBar(controller: _searchController),
+                Expanded(child: _buildBody(bloc, state)),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () =>
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddTaskView(onSubmit: bloc.addTask))),
+              child: const Icon(Icons.add),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(TaskBloc bloc, TaskState state) {
+    if (state is TaskLoading || state is TaskInitial) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state is TaskError) {
+      return Center(child: Text(state.message));
+    }
+    final tasks = state is TaskLoaded ? state.tasks : <TodoTask>[];
+    if (tasks.isEmpty) {
+      return EmptyState(
+        filter: bloc.currentFilter,
+        searchQuery: _searchController.text,
+        onClearFilters: () {
+          _searchController.clear();
+          bloc.searchTasks('');
+          bloc.changeFilter(TodoTaskFilter.all);
+        },
+      );
+    }
+    return TaskListView(
+      key: _listKey,
+      tasks: tasks,
+      approachKey: 'bloc',
+      onToggle: (task) => bloc.add(ToggleTaskEvent(task)),
+      onDelete: (id) => bloc.add(DeleteTaskEvent(id)),
+      onEdit: (task) => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => EditTaskView(task: task, onSubmit: bloc.updateTask),
+        ),
+      ),
+    );
+  }
+}
