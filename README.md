@@ -1,4 +1,4 @@
-# Análise comparativa de abordagens de gerenciamento de estado em Flutter
+# ANÁLISE COMPARATIVA DE ABORDAGENS DE GERENCIAMENTO DE ESTADO EM FLUTTER: UM ESTUDO DE CASO COM BLOC, RIVERPOD, PROVIDER E GETX
 
 Trabalho de Conclusão de Curso — Sistemas de Informação (UFSC). Compara **BLoC**, **Riverpod**, **Provider** e **GetX** num
 mesmo estudo de caso (uma lista de tarefas), avaliando desempenho e qualidade de software.
